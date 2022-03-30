@@ -16,6 +16,9 @@ static log_location DCUR_LOC = {
         "", "", 0
 };
 
+static char clog_file_name[1 << 8] = "";
+//--------------------------------------------//
+
 //----------------------LOCAL-FUNCTIONS-DECLARATION-----------------------//
 
 void get_log_name(char* str);
@@ -28,7 +31,12 @@ void debug_log(DLOG_TYPE type, const char* string, err_loc location);
 
 int LogInit(CDUMP_OPTION mode, const char* path_to_clogs){
 
-    dlog_init();
+    int dlog_init_ret_code = dlog_init();
+
+    if(dlog_init_ret_code == 1){
+        return 1;
+    }
+
     clog_init(mode, path_to_clogs);
 
 	return;
@@ -38,12 +46,8 @@ int LogInit(CDUMP_OPTION mode, const char* path_to_clogs){
 
 void LogClose(){
 
-	DLOG(INFO, "Logging closed");
-	
-    #if DLOG_TO_FILE_ENABLED
-    assert(dlog_file != NULL);
-    fclose(dlog_file);
-    #endif  // DLOG_TO_FILE_ENABLED
+    clog_close();
+	dlog_close();
 	
     return;
 }
@@ -198,12 +202,11 @@ void debug_log_error(ERROR_CODE err_code, const char* string, ...){
 }
 //--------------------------------------------//
 
-void clog_init(CDUMP_OPTION mode, const char* path){
+void clog_init(CDUMP_OPTION logging_mode, const char* path){
 
-    if(mode == CDUMP_OPTION::FILE || mode == CDUMP_OPTION::BOTH){
-        char name[MAX_LOG_NAME_LEN] = "";
-        get_log_name(name, path);
-        сlog_file = fopen(name, "w");
+    if(logging_mode == CDUMP_OPTION::FILE || logging_mode == CDUMP_OPTION::BOTH){
+        get_log_name(clog_file_name, path);
+        сlog_file = fopen(clog_file_name, "w");
 
         if(clog_file == NULL){
             EDLOG(CREATING_FILE, "Unable to create log file on way: %s%s\n", LOG_LOCATION, name);
@@ -213,6 +216,28 @@ void clog_init(CDUMP_OPTION mode, const char* path){
     DLOG(INFO, "Compiler logging initiated");
 
     return;
+}
+//--------------------------------------------//
+
+void clog_close(CDUMP_OPTION logging_mode){
+
+    if(logging_mode == CDUMP_OPTION::FILE || logging_mode == CDUMP_OPTION::BOTH){
+        
+        fclose(clog_file);
+        DLOG(INFO, "Compiling debug log %s has been close", clog_file_name);
+    }
+
+    return;
+}
+//--------------------------------------------//
+
+// Пока не совсем понимаю как лучше всего реализовать вывод ошибок или варнингов
+// (1) может вообще не делать логи ирл, просто сделать функцию, которая выводит все накопившиеся в структуре gvl ошибки, варнинги и тп
+// после самой возможной стадии
+// (2) делать логи на каждом варнинге и тп, передавая gvl и id текущей стадии компиляции
+void cdebug_log(COMP_STAGE cur_stage){
+
+
 }
 //--------------------------------------------//
 
@@ -231,6 +256,18 @@ int dlog_init(){
     #endif //DLOG_TO_FILE_ENABLED
 
     DLOG(INFO, "Logging initiated");
+
+    return;
+}
+//--------------------------------------------//
+
+void dlog_close(){
+
+    DLOG(INFO, "Logging closed");
+
+    #if DLOG_TO_FILE_ENABLED
+    fclose(dlog_file);
+    #endif  // DLOG_TO_FILE_ENABLED
 
     return;
 }
