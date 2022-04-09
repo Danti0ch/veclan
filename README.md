@@ -4,14 +4,11 @@
 ## Опишу грамматику языка через регулярные выражения:
 
 #### синтаксис описания:
-[abcd] - lexem
-SMTH   - rule
-{a}*   - repeat a (0 or more times)
-
-a | b  - execute a or b
-
-{a}+   - repeat a (1 or more times)
-
+[abcd] - lexem__
+SMTH   - rule__
+{a}*   - repeat a (0 or more times)__
+a | b  - execute a or b__
+{a}+   - repeat a (1 or more times)__
 
 ####  собственно, описание
 ```
