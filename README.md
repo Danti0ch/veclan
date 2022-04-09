@@ -5,10 +5,15 @@
 
 #### синтаксис описания:
 [abcd] - lexem
+
 SMTH   - rule
+
 {a}*   - repeat a (0 or more times)
+
 a | b  - execute a or b
+
 {a}+   - repeat a (1 or more times)
+
 
 ####  собственно, описание
 ```
