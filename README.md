@@ -1,14 +1,17 @@
 # veclan
 
 
-Опишу грамматику языка через регулярные выражения:
-```
+## Опишу грамматику языка через регулярные выражения:
+
+#### синтаксис описания:
 [abcd] - lexem
 SMTH   - rule
 {a}*   - repeat a (0 or more times)
 a | b  - execute a or b
 {a}+   - repeat a (1 or more times)
 
+####  собственно, описание
+```
 PROG	   := FUNC_DEF | ASSIGN [end_of_file]
 
 FUNC_DEF   := [func_prefix] [ident] [bracket_r_l] {[ident] [arg_separator]}* [bracket_r_r] BODY
