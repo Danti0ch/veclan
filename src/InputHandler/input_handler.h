@@ -1,14 +1,44 @@
-#ifndef INPUT_HANLER_H
-#define INPUT_HANLER_H
+#ifndef INPUT_HANDLER_H
+#define INPUT_HANDLER_H
 
-#include <logger.h>
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "support.h"
 
-const uint MAX_FILE_NAME_LEN = 1 << 8;
+typedef unsigned int uint;
 
-// TODO: transfer the file expansion to config file (vecl)
-const char* default_file_name[MAX_FILE_NAME_LEN] = "main.vecl";
+// TODO: implement vector.h to reduce get_file_len method and make vector of strings for text_storage
+/// максимальная длина строки для чтения из файла
+const int MAX_INPUT_LINE_LEN  = 1000;
 
+/// максимальная длина строки для чтения из файла
+const int MAX_INPUT_FILE_SIZE = 10000;
 
-compiler_options* InitCompilerOpts (const int argc, const char* argv[]);
+struct string{
+    char *pointer;       ///< указатель на начало строки
+    uint len;          ///< длина строки (strlen)
+};
 
-#endif  // INPUT_HANLER_H
+struct text_storage{ /// структура, необходимая для хранения группы строк
+    uint   len_buf;       ///< количество символов в буфере
+    uint   n_lines;     ///< количество строк
+
+    string *p_lines;      ///< массив строк типа string
+    char   *buffer;         ///< буфер, в котором находится содержимое всех строк. каждая строка должна оканчиваться '\0'
+};
+
+const int P_AFTER_CALLOC = 0xDEADBEAF;
+
+/**
+ * считывает содержимое файла file_name в структуру storage
+ * 
+ * \param file_name имя файла
+ * \param storage структура, в которую нужно считать содержимое
+ * 
+ * \return код возвращаемого значения из func_codes
+ */
+void ReadInputFile(text_storage *storage);
+
+#endif // INPUT_HANDLER_H

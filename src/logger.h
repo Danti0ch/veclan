@@ -1,11 +1,26 @@
+/**
+ * @file logger.h
+ * @brief реализация методы для логирования ошибок, варнингов компиляции этой программы и логирования ошибок, варнингов компилируемой пользовательской программы
+ * @version 0.1
+ * @date 2022-04-10
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #ifndef LOGGER_H
 #define LOGGER_H
+
 
 enum ERROR_CODE{
 
     OK,
     ALLOC_MEM,
     CREATING_FILE,
+    OPENING_FILE,
+    EMPTY_INPUT_FILE,
+    READ_BUFFER,
+    
 };
 
 enum COMP_STAGE{

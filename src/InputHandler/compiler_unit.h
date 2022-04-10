@@ -32,7 +32,7 @@ gvl_flag gvl_flags[FLAGS_NUM] = {
 
 /**
  * @brief general struct for containing state and metadata about current compiling
- * 
+ *        тут будут храниться ключи компиляции, метаданные о файле, стек ошибок,
  */
 struct gvl_unit{
 
@@ -41,6 +41,6 @@ struct gvl_unit{
 
     char flags_set[FLAGS_NUM];
     CDUMP_OPTION logging_mode;
-};х
+};
 
 #endif  // COMPILER_UNIT_H  
