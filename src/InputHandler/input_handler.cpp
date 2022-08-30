@@ -1,203 +1,93 @@
 #include "input_handler.h"
-#include "compiler_unit.h"
+#include "../Structs/text_storage.h"
+#include "../logger.h"
+#include <assert.h>
 
-// TODO: подкрутить логирование
-// TODO: сделать полный рефактор
 
-/// хранит указатель на си строку и её длину
+gvl_flag gvl_flags[FLAGS_NUM] = {
+    {"-o", ASSIGN_NAME}
+};
 
-//----------------------LOCAL-FUNCTIONS-DECLARATION-----------------------//
+//========================================================================================//
 
-/**
- * получает количество строк и символов файла
- * 
- * \param file_name имя файла, размер которого нужно узнать
- * \param  storage
- * 
- * \return код возвращаемого значения из func_codes
- */
-void get_file_len(text_storage* storage);
+//                          LOCAL_FUNCTIONS_DECLARATION
 
-/**
- * функция выделяет память для указателей storage. размер необходимый памяти задаётся storage.buf_len и storage.num_lines
- * 
- * \param storage структура text_storage для которой нужно выделить память
- * 
- * \return код возвращаемого значения из func_codes
- */ 
-void create_mem_storage(text_storage *storage);
+//========================================================================================//
 
-/**
- * функция очищает память, которая была динамически присвоена элементам storage в create_mem_storage
- * 
- * \param storage структура text_storage, память которой нужно очистить
- * 
- * \return код возвращаемого значения из func_codes
- */ 
-void clear_mem_storage(text_storage *storage);
+static void parse_flags(gvl_unit* gvl, const int argc, const char* argv[]);
 
-inline size_t get_bytes(void *left_pointer, void *right_pointer){
+//========================================================================================//
 
-    return (char*)(right_pointer) - (char *)(left_pointer);
+//                          PUBLIC_FUNCTIONS_DEFINITION
+
+//========================================================================================//
+
+void ReadText(gvl_unit* gvl){
+
+    assert(gvl != NULL);
+    gvl->text_data = GetStorage(gvl->input_file_name);
+
+    return;
 }
+//----------------------------------------------------------------------------------------//
 
-//----------------------PUBLIC-FUNCTIONS-DEFINITIONS----------------------//
+// FillCompilerOpts -> construction of the buffer struct that contains compiling info
+void FillCompilerOpts(gvl_unit* gvl, const int argc, const char* argv[]){
 
+    assert(gvl != NULL);
+    assert(argc > 0);
+    assert(argv != NULL);
 
-void ReadInputFile(text_storage *storage){
+    if(argc == 1) ECLOG("write name of the file to compile")
 
-    assert(storage != NULL);
-    assert(file_name != NULL);
+    size_t file_name_len = strlen(argv[1]);
 
-    get_file_len(storage));
-    create_mem_storage(storage);
+    if(file_name_len >= MAX_FILE_NAME_LEN) ECLOG("file name len exceeded");
 
-    const char* file_name = GetInputFileName();
-    FILE *input_file = fopen(file_name, "r");
+    strcpy(gvl->input_file_name, argv[1]);
+    parse_flags(gvl, argc, argv);
 
-    if(input_file == NULL){
-        EDLOG(OPENING_FILE, "unable to open %s", file_name);
-    }
-    
-    int reading_status = fread(storage->buffer, sizeof(storage->buffer[0]), storage->len_buf, input_file);
+    return;
+}
+//----------------------------------------------------------------------------------------//
 
-    if(reading_status < 0){
-        EDLOG(READ_BUFFER, "unable to read data from %s", file_name);
-    }
+//========================================================================================//
 
-    fclose(input_file);
+//                          LOCAL_FUNCTIONS_DEFINITION
 
-    // ?
-    storage->buffer[storage->len_buf - 1] = '\n';
+//========================================================================================//
 
-    int is_new_line = 1;
-    size_t n_line = 0;
-    size_t n_symbols_in_line = 1;
+static void parse_flags(gvl_unit* gvl, const int argc, const char* argv[]){
 
-    // TODO: 
-    const char comment_symb = *(GetLexemName(COMMENT_SYMB));
+    assert(gvl != NULL);
+    assert(argv != NULL);
+    assert(argc > 1);
 
-    // TODO: многострочная лексема под символ комментария
-    // TODO: уменьшить размер под хранение буфера за счёт того, чтобы пересоздавать буфер без комментариев в нём
-    
-    for(int ind_buf = 0; ind_buf < storage->len_buf; ind_buf++, n_symbols_in_line++){
+    if(argc < 3) return;
 
-        if(is_new_line){
-            storage->p_lines[n_Line].pointer = storage->buffer + ind_buf;
+    DLOG(INFO, "parse flags initiated");
 
-            is_new_line = 0;
-        }
-        if(storage->buffer[ind_buf] == '\n'){
-            storage->p_lines[n_line].len = n_symbols_in_line - 1; // '\0' не учитывается в длине строки
+    for(uint word_ind = 2; word_ind < argc; word_ind++){
 
-            n_symbols_in_line = 0;
-            storage->buffer[ind_buf] = '\0';
+        const char* cur_word = argv[word_ind];
 
-            is_new_line = 1;
-            n_line++;
-        }
-        if(storage->buffer[ind_buf] == comment_symb){
+        // Нужно собрать все флаги, которые не распознаны в один буфер, а потом если этот буфер составлен, то вывести его и вывести сообщение об ошибке
+        if(cur_word[0] == '-'){
+            for(int n_flag = 0; n_flag < FLAGS_NUM; n_flag++){
 
-            storage->buffer[ind_buf] = '\0';
-
-            while(ind_buf < storage->len_buf && storage->buffer[ind_buf] != '\n'){
-                ind_buf++;
+                if(strcmp(cur_word, gvl_flags[n_flag].name) == 0){
+                    gvl->flags_set[n_flag] = 1;
+                    MDLOG("%s flag recognized", cur_word);
+                }
             }
-            ind_buf--;
+        }
+        else{
+
         }
     }
-
-    return;
-}
-//----------------------------------------------------------------------------------------//
-
-//----------------------LOCAL-FUNCTIONS-DEFINITIONS----------------------//
-
-void clear_mem_storage(text_storage *storage){
-
-    assert(storage != NULL);
     
-    free(storage->p_lines);
-    free(storage->buffer);
-
-    storage->buffer  = (char*)P_AFTER_CALLOC;
-    storage->p_lines = (string*)P_AFTER_CALLOC;
+    DLOG(INFO, "parse flags finished");
     
     return;
-}
-//----------------------------------------------------------------------------------------//
-
-void create_mem_storage(text_storage *storage){
-
-    assert(storage != NULL);
-    assert(storage->len_buf > 0);
-    assert(storage->num_lines > 0);
-    
-    storage->buffer = (char*)calloc(storage->len_buf, sizeof(char));
-
-    storage->p_lines = (string*)calloc(storage->n_lines, sizeof(string));
-
-    if((storage->buffer == NULL) || (storage->p_lines == NULL)){
-        EDLOG(ALLOC_MEM, "unable alloc mem for text storage");
-    }
-
-    return;
-}
-//----------------------------------------------------------------------------------------//
-
-// x6,5 faster than fgetc stuff
-void get_file_len(text_storage* storage){
-
-    assert(file_name != NULL);
-    assert(storage != NULL);
-    
-    const char* file_name = GetInputFileName();
-
-    storage->len_buf     = 0;
-    storage->n_lines = 0;
-
-    FILE *text_file = fopen(file_name, "r");
-
-    if(text_file == NULL){
-        EDLOG(OPENING_FILE, "unable to open %s", file_name);    
-    }
-
-    fseek(text_file, 0, SEEK_END);
-
-    size_t file_size = ftell(text_file);
-
-    if(file_size <= 0){
-        fclose(text_file);
-        EDLOG(EMPTY_INPUT_FILE, "file %s is empty", file_name);
-    }
-
-    fseek(text_file, 0, SEEK_SET);
-
-    char *buffer = (char*)calloc(file_size + 1, sizeof(char));
-
-    size_t n_readen_bytes = fread(buffer, sizeof buffer[0], file_size + 1, text_file);
-
-    if(n_readen_bytes == 0){
-        fclose(text_file);
-        EDLOG(READ_BUFFER, "unable to read data of %s", file_name);
-    }
-
-    storage->len_buf = n_readen_bytes;
-
-    for(uint n_byte = 0; n_byte < n_readen_bytes; n_byte++){
-        if(buffer[n_byte] == '\n'){
-            storage->n_lines++;
-        }
-    }
-
-    // если на последней непустой строчке нет символа переноса
-    if((buffer[n_readen_bytes - 1] > 0) && (buffer[n_readen_bytes - 1] != '\n')){
-        storage->n_lines++;
-    }
-
-    free(buffer);
-    fclose(text_file);
-
-    return OK;
 }
 //----------------------------------------------------------------------------------------//

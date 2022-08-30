@@ -1,11 +1,24 @@
+// TODO: DELETE INPUT HANDLER
+
+// TODO: пофиксить относительный порядок хэдеров
+#include "logger.h"
+#include "compiler_unit.h"
+#include "Analyzer/analyzer.h"
+#include "InputHandler/input_handler.h"
+
 int main(const int argc, const char* argv[]){
 
-    ParseCmdOptions(argc, argv);
+    LogInit("../logs/");
+    gvl_unit* gvl = GvlUnitConstructor();
 
-    text_storage input_text_storage = {};
-
-    ReadInputFile(&input_text_storage);
-
+    FillCompilerOpts(gvl, argc, argv);
     
+    ReadText(gvl);
+
+    InitAnalyze(gvl);
+    
+    GvlUnitDestructor(gvl);
+
+    LogClose();
     return 0;
 }

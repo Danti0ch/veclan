@@ -1,6 +1,6 @@
 /**
  * @file logger.h
- * @brief реализация методы для логирования ошибок, варнингов компиляции этой программы и логирования ошибок, варнингов компилируемой пользовательской программы
+ * @brief реализация методов для логирования ошибок
  * @version 0.1
  * @date 2022-04-10
  * 
@@ -10,6 +10,8 @@
 
 #ifndef LOGGER_H
 #define LOGGER_H
+
+#include <assert.h>
 
 typedef unsigned int uint;
 
@@ -22,15 +24,6 @@ enum ERROR_CODE{
     OPENING_FILE,
     EMPTY_INPUT_FILE,
     READ_BUFFER,
-};
-
-enum COMP_STAGE{
-
-    INPUT_HANDLER,
-    LEXER,
-    PARSER,
-    CODE_GEN,
-    ASM
 };
 
 enum class CDUMP_OPTION{
@@ -54,7 +47,8 @@ enum LOG_TYPE{
 };
 
 // TODO: replace to auxil file ??
-#define ISNULL(obj) obj == NULL;
+#define NASSERT(obj) assert(obj != NULL);
+#define ISNULL(obj) obj == NULL
 #define CHECKALLOC(obj) if(obj == NULL) ESDLOG(ALLOC_MEM);
 
 const uint UNRECOGNIZED_ERR_CODE = 0xDEADBEAF;
