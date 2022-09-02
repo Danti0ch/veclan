@@ -56,9 +56,10 @@ void        TextDumpLexGraph(const lex_graph* obj);
 
 const uint VECSET_INIT_CAPACITY = 16;
 
-const char CODE_SEPARATOR[]           = "\n";
-const char BUF_POINTER_IN_CODE_NAME[] = "p_buf";
-const char BUF_COUNTER_IN_CODE_NAME[] = "n_symb";
-const char BUF_COUNTER_LIMIT_NAME[]   = "max_n_symbs";
+const char CODE_SEPARATOR[]            = "\n";
+const char BUF_POINTER_IN_CODE_NAME[]  = "p_buf";
+const char BUF_COUNTER_IN_CODE_NAME[]  = "n_symb";
+const char BUF_INIT_POS_IN_CODE_NAME[] = "n_init_pos";
+const char BUF_COUNTER_LIMIT_NAME[]    = "max_n_symbs";
 
 #endif // LEX_GRAPH

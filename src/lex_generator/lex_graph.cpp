@@ -73,6 +73,7 @@ lex_graph* ConvertTreeToNFA(const Node* ast_tree, const uint accept_state_meta_d
 
     NASSERT(ast_tree);
 
+    DLOG
     lex_graph* nfa_graph = LexGraphInit();
 
     aux_graph outcome_graph = parse_ast(ast_tree, nfa_graph);

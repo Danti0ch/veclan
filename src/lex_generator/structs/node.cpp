@@ -47,16 +47,16 @@ Node* NodeCtor(Node* parent, void* val, size_t elem_size, NODE_PLACE place){
 
 	Node* node = NodeCtor(val, elem_size);
 
-	if(node == NULL) return NULL;
+	if(ISNULL(node)) return NULL;
 
 	node->parent = parent;
 	node->place  = place;
-
+ 
 	if(place == NODE_PLACE::LEFT){
-		if(parent != NULL) parent->left  = node;
+		if(ISNULL(parent)) parent->left  = node;
 	}
 	else{
-		if(parent != NULL) parent->right = node;
+		if(ISNULL(parent)) parent->right = node;
 	}
 	return node;
 }
