@@ -13,7 +13,10 @@ struct vec_set{
     void  (*get_data_to_set_func)();
 };
 
+const uint VECSET_INIT_CAPACITY = 16;
+
 vec_set*  VecsetCtor(const size_t init_capacity);
+vec_set*  VecsetCtor();
 void      VecsetDtor(vec_set* obj);
 void      VecsetPush(vec_set* obj, const uint elem);
 uint      VecsetSize(const vec_set* obj);

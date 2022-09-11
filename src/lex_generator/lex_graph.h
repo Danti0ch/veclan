@@ -7,6 +7,12 @@
 #include "set.h"
 #include "vec_set.h"
 
+/**
+ * @brief алгоритм преобразования NFA->DFA, минимазация DFA находится в книге 
+ *        "Basics of Compiler Design" by Torben Mogensen, издание 20.08.2010. Разделы 2.6, 2.8
+ * 
+ */
+
 //TODO: rename lex_graph -> ???
 struct state{
     vector* conns;
@@ -44,17 +50,39 @@ struct aux_graph{
     char    accept_state_symb;
 };
 
+/**
+ * @brief преобразовывает содержимое AST дерева в структуру lex_graph, которая будет иметь вид NFA графа
+ * 
+ * @param ast_tree исходный обьект типа Node, который нужно преобразовать
+ * @param accept_state_meta_data метаданные, которые будут храниться в конечной вершине NFA графа(например ID токена, если ast_tree было создано на основе регулярного выражения токена)
+ * @return lex_graph* NFA граф, получившийся из AST дерева
+ */
 lex_graph*  ConvertTreeToNFA(const Node* ast_tree, const uint accept_state_meta_data);
-lex_graph*  ConvertNFAtoDFA(const lex_graph* nfa_graph);
-void        MinimizeDFA(const lex_graph* dfa_graph);
-void        MergeGraphsParallel(lex_graph* graph1, lex_graph* graph2);
 
-lex_graph*  LexGraphInit();
-void        LexGraphRemove(lex_graph* graph);
+/**
+ * @brief генерация DFA графа на основе NFA графа. Алгоритм см в начале файла
+ */
+lex_graph*  ConvertNFAtoDFA(const lex_graph* nfa_graph);
+
+/**
+ * @brief минимазация DFA графа. Источник алгоритма см выше
+ */
+// void        MinimizeDFA(const lex_graph* dfa_graph);
+
+/**
+ * @brief добавляет все данные из graph2 в graph1. Увеличивает значения state'ов graph2 в graph1 на количество state'ов graph1. Удаляет graph2.
+ * 
+ */
+void MergeGraphsParallel(lex_graph* graph1, lex_graph* graph2);
+
+/**
+ * @brief создаёт графическое представление графа с помощью graphviz'a. Генерируется png картинка с именем file_name
+ * 
+ * @param graph 
+ * @param file_name 
+ */
 void        DumpLexGraph(const lex_graph* graph, const char* file_name);
 void        TextDumpLexGraph(const lex_graph* obj);
-
-const uint VECSET_INIT_CAPACITY = 16;
 
 const char CODE_SEPARATOR[]            = "\n";
 const char BUF_POINTER_IN_CODE_NAME[]  = "p_buf";

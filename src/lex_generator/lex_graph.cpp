@@ -10,6 +10,8 @@
 // TODO: возможность создания не .o файла а обычного текстого cpp файла
 // TODO: генерить не текст, а байтовый код
 
+// TODO: придумать более подробное описание
+/// @brief хранилище групп state'ов, которые собираются при генерации DFA из NFA.
 vector*    states_package      = NULL;
 
 //========================================================================================//
@@ -18,12 +20,39 @@ vector*    states_package      = NULL;
 
 //========================================================================================//
 
+static lex_graph* lex_graph_init();
+static void       lex_graph_remove(lex_graph* graph);
+
+/**
+ * @brief номер нового state это текущее количество state'ов в графе + 1.
+ * 
+ * @return uint номер созданного state'a
+ */
 static uint      create_state(const lex_graph* graph);
+
+/**
+ * @brief создаёт связь(conn) от узла from state к узлу to_state. Добавляет символ в алфавит, если его там нет
+ */
 static void      add_conn(const lex_graph* graph, uint from_state, uint to_state, char symb);
 
+/**
+ * @brief  (A | B). выдаёт граф, полученный в результате параллельного обьединения obj1, obj2.
+ */
 static aux_graph merge_parallel(const lex_graph* graph, aux_graph* obj1, aux_graph* obj2);
+
+/**
+ * @brief  AB. выдаёт граф, полученный в результате прямого обьединения obj1, obj2.
+ */
 static aux_graph merge_straight(const lex_graph* graph, aux_graph* obj1, aux_graph* obj2);
 
+/**
+ * @brief A*. выдаёт граф, полученный в результате зацикливания графа obj
+ */
+static aux_graph make_repeat(const lex_graph* graph, aux_graph* obj);
+
+/**
+ * @brief генерирует граф вида aux_graph на основе дерева ast_tree.
+ */
 static aux_graph parse_ast(const Node* ast_tree, const lex_graph* nfa_graph);
 
 static void      generate_dot(const lex_graph* graph, char const * file_name);
@@ -33,6 +62,7 @@ static void      execute_term_cmd(char const * cmd_str, ...);
 
 static void      state_dump(const state* cur_state, const uint n_state);
 static void      dump_package_states();
+
 /**
  * @brief puts all states of epsilon closure of graph to the closure object
  */
@@ -43,6 +73,13 @@ static void      handle_state(const lex_graph* in_graph, const lex_graph* out_gr
 static void      mark_accept_states(const lex_graph* graph, const uint accept_state_id, const vec_set* accept_state_meta_data);
 
 int              package_find(vec_set* closure);
+
+/**
+ * @brief вспомогательная функции для MergeGraphs. Перебрасывают соответствующие элементы graph_from в graph_to
+ */
+static void      alphabet_merge(lex_graph* graph_to, const lex_graph* graph_from);
+static void      states_merge(lex_graph* graph_to, const lex_graph* graph_from);
+static void      accept_states_merge(lex_graph* graph_to, const lex_graph* graph_from);
 
 inline int is_graph_empty(aux_graph* graph){
 
@@ -73,67 +110,31 @@ lex_graph* ConvertTreeToNFA(const Node* ast_tree, const uint accept_state_meta_d
 
     NASSERT(ast_tree);
 
-    DLOG
-    lex_graph* nfa_graph = LexGraphInit();
+    DLOG(INFO, "Attempt to convert tree(%p) to lex_graph", ast_tree);
+    lex_graph* nfa_graph = lex_graph_init();
 
     aux_graph outcome_graph = parse_ast(ast_tree, nfa_graph);
-
+    
     nfa_graph->start_state  = outcome_graph.start_state;
 
     VecsetPush(nfa_graph->accept_states, outcome_graph.accept_state);
     VectorPush(nfa_graph->accept_states_meta_data, &accept_state_meta_data);
 
+    DLOG(INFO, "tree(%p) was successfuly converted to lex_graph(%p)", nfa_graph);
+    TextDumpLexGraph(nfa_graph);
+
     return nfa_graph;
-}
-//----------------------------------------------------------------------------------------//
-
-// TODO: local??
-lex_graph* LexGraphInit(){
-
-    lex_graph* obj = (lex_graph*)calloc(1, sizeof(lex_graph));
-    CHECKALLOC(obj);
-
-    obj->states                  = VectorNew(0, sizeof(state));
-    obj->alphabet                = VecsetCtor(VECSET_INIT_CAPACITY);
-    obj->accept_states           = VecsetCtor(VECSET_INIT_CAPACITY);
-    obj->accept_states_meta_data = VectorNew(0, sizeof(vec_set));
-
-    return obj;
-}
-//----------------------------------------------------------------------------------------//
-
-void LexGraphRemove(lex_graph* graph){
-
-    vector* states      = graph->states;
-    uint    n_states    = VectorSize(graph->states);
-
-    state temp_state = {};
-    for(uint n_state = 0; n_state < n_states; n_state++){
-        VectorGet(states, n_state, &temp_state);
-        VectorDelete(temp_state.conns);
-    }
-
-    uint n_accept_states = VectorSize(graph->accept_states_meta_data);
-    for(uint n_accept_state = 0; n_accept_state < n_accept_states; n_accept_state++){
-        VecsetDtor(VectorGet(graph->accept_states_meta_data, n_accept_state));
-    }
-
-    VectorDelete(states);
-    VecsetDtor(graph->alphabet);
-    VecsetDtor(graph->accept_states);
-    VectorDelete(graph->accept_states_meta_data);
-
-    free(graph);
-
-    return;
 }
 //----------------------------------------------------------------------------------------//
 
 void DumpLexGraph(const lex_graph* graph, const char* file_name){
 
     NASSERT(graph);
+	NASSERT(file_name);
+
+    DLOG(LOG_TYPE::INFO, "attempt to generate \"%s.png\" image from data of lex_graph(%p)", file_name, graph);
 	
-	generate_dot(graph, GVIZ_DOT_NAME);
+    generate_dot(graph, GVIZ_DOT_NAME);
 	generate_image(GVIZ_DOT_NAME, file_name);
 
 	DLOG(LOG_TYPE::INFO, "showed graph %p", graph);	
@@ -145,19 +146,22 @@ lex_graph*  ConvertNFAtoDFA(const lex_graph* nfa_graph){
 
     NASSERT(nfa_graph);
     
+    DLOG(LOG_TYPE::INFO, "Attempt to make convertion nfa graph(%p) to dfa graph", nfa_graph);
+
                 states_package  = VectorNew(VectorSize(nfa_graph->states), sizeof(vec_set));
-    lex_graph*  dfa_graph       = LexGraphInit();
-    
-    vec_set*    s0_closure      = VecsetCtor(VECSET_INIT_CAPACITY);
+    lex_graph*  dfa_graph       = lex_graph_init();
+    vec_set*    s0_closure      = VecsetCtor();
 
     get_eps_closure(s0_closure, nfa_graph, nfa_graph->start_state);
-    
+    DLOG(LOG_TYPE::INFO, "Got epsilon closure for state 0");
+
     dfa_graph->start_state  = create_state(dfa_graph);
 
     VectorPush(states_package, s0_closure);
 
     for(uint n_state = 1; n_state <= /* dynamic */ VectorSize(dfa_graph->states); n_state++){
         handle_state(nfa_graph, dfa_graph, n_state);
+        DLOG(LOG_TYPE::INFO, "state %u was successfuly handled", n_state);
     }
 
     uint n_accept_states = VecsetSize(nfa_graph->accept_states);
@@ -167,10 +171,12 @@ lex_graph*  ConvertNFAtoDFA(const lex_graph* nfa_graph){
         uint accept_state_id = VecsetGet(nfa_graph->accept_states, n_acc_state);
         mark_accept_states(dfa_graph, accept_state_id);
     }
+    DLOG(LOG_TYPE::INFO, "accept states were marked");
 
     VectorDelete(states_package);
     states_package = NULL;
 
+    DLOG(LOG_TYPE::INFO, "nfa graph(%p) was converted to dfa graph(%p)", nfa_graph, dfa_graph);
     return dfa_graph;
 }
 //----------------------------------------------------------------------------------------//
@@ -179,7 +185,7 @@ void TextDumpLexGraph(const lex_graph* obj){
 
     NASSERT(obj);
 
-    DLOG(INFO, "DUMP vec_set<%p>", obj);
+    DLOG(LOG_TYPE::INFO, "DUMP vec_set<%p>", obj);
 
     MDLOG("start  state:  %u\n"
           "n_states:      %u\n"
@@ -214,94 +220,24 @@ void TextDumpLexGraph(const lex_graph* obj){
 }
 //----------------------------------------------------------------------------------------//
 
-/*
-    lets just add states, symbs from graph2 to graph1 and remove graph2 after adding
-*/
 void  MergeGraphsParallel(lex_graph* graph1, lex_graph* graph2){
 
     NASSERT(graph1);
     NASSERT(graph2);
 
-    const uint n_symbs_in_graph2 = VecsetSize(graph2->alphabet);
-    for(uint n_symb = 0; n_symb < n_symbs_in_graph2; n_symb++){
+    DLOG(LOG_TYPE::INFO, "begin merging lex_graph(%p) and lex_graph(%p)", graph1, graph2);
 
-        uint cur_symb = VecsetGet(graph2->alphabet, n_symb);
-        if(!VecsetFind(graph1->alphabet, cur_symb)){
-            VecsetPush(graph1->alphabet, cur_symb);
-        }
-    }
-
-    const uint n_states_in_graph2 = VectorSize(graph2->states);
-    const uint n_states_in_graph1 = VectorSize(graph1->states);
+    alphabet_merge(graph1, graph2);
+    DLOG(LOG_TYPE::INFO, "alphabet merging completed");
     
-    for(uint n_state = 0; n_state < n_states_in_graph2; n_state++){
-        
-        state state_to_add = {};
-        state cur_state    = {};
-        VectorGet(graph2->states, n_state, &cur_state);
+    states_merge(graph1, graph2);
+    DLOG(LOG_TYPE::INFO, "states merging completed");
 
-        if(cur_state.id != graph2->start_state){
-            state_to_add.id = cur_state.id + n_states_in_graph1;
-        }
-        else{
-            state_to_add.id = graph1->start_state;
-        }
-        state_to_add.conns = VectorNew(VectorSize(cur_state.conns), sizeof(conn));
+    accept_states_merge(graph1, graph2);
+    DLOG(LOG_TYPE::INFO, "acccept_states merging completed");
 
-        const uint n_conns = VectorSize(cur_state.conns);
-        for(uint n_conn = 0; n_conn < n_conns; n_conn++){
-
-            conn conn_to_add = {};
-            conn cur_conn    = {};
-            
-            VectorGet(cur_state.conns, n_conn, &cur_conn);
-
-            if(cur_conn.next_state != graph2->start_state){
-                conn_to_add.next_state = cur_conn.next_state + n_states_in_graph1;
-            }
-            else{
-                conn_to_add.next_state = graph1->start_state;
-            }
-
-            conn_to_add.symb = cur_conn.symb;
-
-            VectorPush(state_to_add.conns, &conn_to_add);
-        }
-
-        VectorPush(graph1->states, &state_to_add);
-    }
-
-    const uint n_accept_states_in_graph2 = VecsetSize(graph2->accept_states);
-    for(uint n_accept_state = 0; n_accept_state < n_accept_states_in_graph2; n_accept_state++){
-        
-        uint cur_state = VecsetGet(graph2->accept_state, n_accept_state);
-
-        vec_set* cur_state_meta_data      = (vec_set*)VectorGet(graph2->accept_states_meta_data, cur_state);
-        uint     cur_state_meta_data_size = VecsetSize(cur_state_meta_data);
-        vec_set* new_state_meta_data      = VecsetCtor(input_meta_data_size);
-        
-        for(uint n_data_block = 0; n_data_block < cur_state_meta_data_size; n_data_block++){
-            void* data_block = VecsetGet(cur_state_meta_data, n_data_block);
-
-            VecsetPush(new_state_meta_data, data_block);
-        }
-
-        if(cur_state != graph2->start_state){
-            cur_state += n_states_in_graph1;
-        }
-        else{
-            cur_state = graph1->start_state;
-        }
-
-        assert(VecsetSize(graph1->accept_states) == VectorSize(graph1->accept_states_meta_data));
-
-        VecsetPush(graph1->accept_states, cur_state);
-        VectorPush(graph1->accept_states_meta_data, new_state_meta_data);
-
-        free(new_state_meta_data);
-    }
-
-    LexGraphRemove(graph2);
+    lex_graph_remove(graph2);
+    DLOG(LOG_TYPE::INFO, "graph2(%p) was removed", graph2);
 
     return;
 }
@@ -311,6 +247,54 @@ void  MergeGraphsParallel(lex_graph* graph1, lex_graph* graph2){
 //                          LOCAL_FUNCTIONS_DEFINITION
 
 //========================================================================================//
+
+lex_graph* lex_graph_init(){
+
+    DLOG(ILOG_TYPE::NFO, "Attempt to initialize lex_graph");
+    lex_graph* obj = (lex_graph*)calloc(1, sizeof(lex_graph));
+    CHECKALLOC(obj);
+
+    obj->states                  = VectorNew(0, sizeof(state));
+    obj->alphabet                = VecsetCtor(VECSET_INIT_CAPACITY);
+    obj->accept_states           = VecsetCtor(VECSET_INIT_CAPACITY);
+    obj->accept_states_meta_data = VectorNew(0, sizeof(vec_set));
+
+    DLOG(LOG_TYPE::INFO, "lex_graph(%p) was successfuly initiated", obj);
+
+    return obj;
+}
+//----------------------------------------------------------------------------------------//
+
+void lex_graph_remove(lex_graph* graph){
+
+    if(ISNULL(graph)) return;
+
+    DLOG(LOG_TYPE::INFO, "Attempt to remove lex_graph(%p)", graph);
+
+    vector* states      = graph->states;
+    uint    n_states    = VectorSize(graph->states);
+
+    for(uint n_state = 0; n_state < n_states; n_state++){
+        state* cur_state = (state*)VectorGet(states, n_state);
+        VectorDelete(cur_state->conns);
+    }
+
+    uint n_accept_states = VectorSize(graph->accept_states_meta_data);
+    for(uint n_accept_state = 0; n_accept_state < n_accept_states; n_accept_state++){
+        VecsetDtor(VectorGet(graph->accept_states_meta_data, n_accept_state));
+    }
+
+    VectorDelete(states);
+    VecsetDtor(graph->alphabet);
+    VecsetDtor(graph->accept_states);
+    VectorDelete(graph->accept_states_meta_data);
+
+    free(graph);
+    DLOG(LOG_TYPE::INFO, "lex_graph(%p) was removed successfuly", graph);
+
+    return;
+}
+//----------------------------------------------------------------------------------------//
 
 static uint create_state(const lex_graph* graph){
 
@@ -331,12 +315,10 @@ static void add_conn(const lex_graph* graph, uint from_state, uint to_state, cha
     NASSERT(graph);
 
     conn temp = {to_state, symb};
-    
-    state tmp_state = {};
 
     // TODO: check situation index != state_id
-    VectorGet(graph->states, from_state - 1, &tmp_state);
-    VectorPush(tmp_state.conns, &temp);
+    state* tmp_state = (state*)VectorGet(graph->states, from_state - 1);
+    VectorPush(tmp_state->conns, &temp);
 
     if(!VecsetFind(graph->alphabet, symb) && symb != SPEC_EPS_VAL){
         VecsetPush(graph->alphabet, symb);
@@ -348,6 +330,7 @@ static void add_conn(const lex_graph* graph, uint from_state, uint to_state, cha
 
 static aux_graph merge_parallel(const lex_graph* graph, aux_graph* obj1, aux_graph* obj2){
 
+    NASSERT(graph);
     NASSERT(obj1);
     NASSERT(obj2);
     
@@ -368,6 +351,7 @@ static aux_graph merge_parallel(const lex_graph* graph, aux_graph* obj1, aux_gra
 
 static aux_graph merge_straight(const lex_graph* graph, aux_graph* obj1, aux_graph* obj2){
 
+    NASSERT(graph);
     NASSERT(obj1);
     NASSERT(obj2);
 
@@ -381,6 +365,7 @@ static aux_graph merge_straight(const lex_graph* graph, aux_graph* obj1, aux_gra
 
 static aux_graph make_repeat(const lex_graph* graph, aux_graph* obj){
 
+    NASSERT(graph);
     NASSERT(obj);
 
     uint new_state = create_state(graph);
@@ -399,6 +384,9 @@ static aux_graph parse_ast(const Node* ast_tree, const lex_graph* nfa_graph){
     NASSERT(ast_tree);
     NASSERT(nfa_graph);
 
+    DLOG(LOG_TYPE::INFO, "Attempt parsing Node(%p)", ast_tree);
+
+    // Парсим левое и правое поддеревья.
     aux_graph left_graph  = {};
     aux_graph right_graph = {};
 
@@ -409,6 +397,7 @@ static aux_graph parse_ast(const Node* ast_tree, const lex_graph* nfa_graph){
         right_graph = parse_ast(ast_tree->right, nfa_graph);
     }
 
+    // Соединияем полученные графы, на основе значения в дереве.
     char node_val = *(char*)ast_tree->val;
 
     if(node_val == SPEC_OR_VAL){
@@ -428,6 +417,8 @@ static aux_graph parse_ast(const Node* ast_tree, const lex_graph* nfa_graph){
     }
 
     assert(is_graph_empty(&left_graph) && is_graph_empty(&right_graph));
+
+    // если текущий узел - лист, то дополняем алфавит и возвращаем граф из одной вершины
     uint new_state = create_state(nfa_graph);
 
     if(!VecsetFind(nfa_graph->alphabet, node_val)){
@@ -437,6 +428,7 @@ static aux_graph parse_ast(const Node* ast_tree, const lex_graph* nfa_graph){
     }
     aux_graph graph = {new_state, new_state, node_val};
 
+    DLOG(LOG_TYPE::INFO, "Parsing Node(%p) completed", ast_tree);
     return graph;
 }
 //----------------------------------------------------------------------------------------//
@@ -784,6 +776,113 @@ static void mark_accept_states(const lex_graph* graph, const uint accept_state_i
                 free(cur_state_meta_data);
             }
         }
+    }
+
+    return;
+}
+//----------------------------------------------------------------------------------------//
+
+static void alphabet_merge(lex_graph* graph_to, const lex_graph* graph_from){
+    
+    NASSERT(graph_to);
+    NASSERT(graph_from);
+    
+    const uint n_symbs_from = VecsetSize(graph_from->alphabet);
+    
+    for(uint n_symb = 0; n_symb < n_symbs_from; n_symb++){
+
+        uint cur_symb = VecsetGet(graph_from->alphabet, n_symb);
+        if(!VecsetFind(graph_to->alphabet, cur_symb)){
+            VecsetPush(graph_to->alphabet, cur_symb);
+        }
+    }
+
+    return;
+}
+//----------------------------------------------------------------------------------------//
+
+void states_merge(lex_graph* graph_to, const lex_graph* graph_from){
+
+    NASSERT(graph_to);
+    NASSERT(graph_from);
+
+    const uint n_states_from = VectorSize(graph_from->states);
+    const uint n_states_to = VectorSize(graph_to->states);
+    
+    for(uint n_state = 0; n_state < n_states_from; n_state++){
+        
+        state  state_to_add = {};
+        state* cur_state    = (state*)VectorGet(graph_from->states, n_state);
+
+        if(cur_state.id != start_state_from){
+            state_to_add.id = cur_state.id + n_states_to;
+        }
+        else{
+            state_to_add.id = start_state_to;
+        }
+        state_to_add.conns = VectorNew(VectorSize(cur_state.conns), sizeof(conn));
+
+        const uint n_conns = VectorSize(cur_state.conns);
+        for(uint n_conn = 0; n_conn < n_conns; n_conn++){
+
+            conn conn_to_add = {};
+            
+            conn* cur_conn = (conn*)VectorGet(cur_state.conns, n_conn);
+
+            if(cur_conn->next_state != start_state_from){
+                conn_to_add.next_state = cur_conn->next_state + n_states_to;
+            }
+            else{
+                conn_to_add.next_state = start_state_to;
+            }
+
+            conn_to_add.symb = cur_conn->symb;
+
+            VectorPush(state_to_add.conns, &conn_to_add);
+        }
+
+        VectorPush(graph_to->states, &state_to_add);
+    }
+
+    return;
+}
+//----------------------------------------------------------------------------------------//
+
+static void accept_states_merge(lex_graph* graph_to, const lex_graph* graph_from){
+
+    NASSERT(graph_to);
+    NASSERT(graph_from);
+
+    uint n_accept_states_from = VecsetSize(graph_from->accept_states);
+    uint n_states_in_graph_to = VectorSize(graph_to->states);
+
+    for(uint n_accept_state = 0; n_accept_state < n_accept_states_from; n_accept_state++){
+        
+        uint cur_state = VecsetGet(graph_from->accept_state, n_accept_state);
+
+        vec_set* cur_state_meta_data      = (vec_set*)VectorGet(graph_from->accept_states_meta_data, cur_state);
+        uint     cur_state_meta_data_size = VecsetSize(cur_state_meta_data);
+        vec_set* new_state_meta_data      = VecsetCtor();
+        
+        for(uint n_data_block = 0; n_data_block < cur_state_meta_data_size; n_data_block++){
+            void* data_block = VecsetGet(cur_state_meta_data, n_data_block);
+
+            VecsetPush(new_state_meta_data, data_block);
+        }
+
+        if(cur_state != graph_from->start_state){
+            cur_state += n_states_in_graph_to;
+        }
+        else{
+            cur_state = graph_to->start_state;
+        }
+
+        assert(VecsetSize(graph_from->accept_states) == VectorSize(graph_to->accept_states_meta_data));
+
+        VecsetPush(graph_to->accept_states, cur_state);
+        VectorPush(graph_to->accept_states_meta_data, new_state_meta_data);
+
+        free(new_state_meta_data);
     }
 
     return;

@@ -40,7 +40,7 @@ struct log_location{
     uint           n_line;
 };
 
-enum LOG_TYPE{
+enum class LOG_TYPE{
     INFO,
     WARNING,
     ERROR

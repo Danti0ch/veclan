@@ -1,0 +1,54 @@
+Date : 2022-09-03 01:02:29
+Directory : /home/plato/mipt_projs/veclan/src/lex_generator
+Total : 27 files,  3180 codes, 783 comments, 1616 blanks, all 5579 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         24 |      3,139 |        783 |      1,593 |      5,515 |
+| C        |          1 |         31 |          0 |         16 |         47 |
+| Ini      |          2 |         10 |          0 |          7 |         17 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                       | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                          |         27 |      3,180 |        783 |      1,616 |      5,579 |
+| structs                                                                    |         17 |      1,521 |        401 |        810 |      2,732 |
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                   | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/plato/mipt_projs/veclan/src/lex_generator/lex_graph.cpp              | C++      |        538 |         82 |        271 |        891 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/lex_graph.h                | C++      |         38 |         38 |         18 |         94 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/logger.cpp                 | C++      |        223 |         35 |        116 |        374 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/logger.h                   | C++      |         76 |         19 |         28 |        123 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/main.cpp                   | C++      |         20 |          6 |         11 |         37 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/parser.cpp                 | C++      |        468 |        101 |        228 |        797 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/parser.h                   | C++      |         35 |          1 |         15 |         51 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/rec_descent.cpp            | C++      |        224 |         99 |        102 |        425 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/rec_descent.h              | C++      |         15 |          0 |          8 |         23 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/spec_constants.h           | C++      |         22 |          1 |          9 |         32 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/node.cpp           | C++      |        219 |         44 |        119 |        382 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/node.h             | C++      |         53 |         56 |         29 |        138 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/set.cpp            | C++      |        100 |         16 |         47 |        163 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/set.h              | C++      |         19 |          9 |         15 |         43 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/stack.cpp          | C++      |        261 |         86 |        132 |        479 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/stack.h            | C++      |        110 |          3 |         34 |        147 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/string_storage.cpp | C++      |        103 |         21 |         69 |        193 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/string_storage.h   | C++      |         23 |          0 |          9 |         32 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/text_storage.cpp   | C++      |        315 |         50 |        180 |        545 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/text_storage.h     | C++      |         57 |         46 |         22 |        125 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/trash.c            | C        |         31 |          0 |         16 |         47 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vec_set.cpp        | C++      |         75 |         13 |         47 |        135 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vec_set.h          | C++      |         23 |          1 |          7 |         31 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vector.cpp         | C++      |         94 |         18 |         57 |        169 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vector.h           | C++      |         28 |         38 |         20 |         86 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/ИДЕИ.ini           | Ini      |          5 |          0 |          4 |          9 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/ПРОБЛЕМЫ.ini       | Ini      |          5 |          0 |          3 |          8 |
+| Total                                                                      |          |      3,180 |        783 |      1,616 |      5,579 |
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+

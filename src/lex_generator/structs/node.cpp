@@ -67,7 +67,7 @@ Node* NodeCtor(void* val, size_t elem_size){
 	NASSERT(val);
 	Node* node  = (Node*)calloc(1, sizeof(Node));
 
-	if(node == NULL){
+	if(ISNULL(node)){
 		EDLOG(ALLOC_MEM, "couldn't alloc mem on node");
 		return NULL;
 	}

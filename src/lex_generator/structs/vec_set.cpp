@@ -2,7 +2,7 @@
 #include "logger.h"
 #include "stdio.h"
 
-vec_set* VecsetCtor(const size_t init_capacity, const size_t elem_size){
+vec_set* VecsetCtor(const size_t init_capacity){
 
     if(init_capacity == 0) return NULL;
 
@@ -10,6 +10,17 @@ vec_set* VecsetCtor(const size_t init_capacity, const size_t elem_size){
 
     new_obj->vt = VectorNew(init_capacity, sizeof(uint));
     new_obj->st = set_new(init_capacity);
+
+    return new_obj;
+}
+//----------------------------------------------------------------------------------------//
+
+vec_set* VecsetCtor(){
+
+    vec_set* new_obj = (vec_set*)calloc(1, sizeof(vec_set));
+
+    new_obj->vt = VectorNew(VECSET_INIT_CAPACITY, sizeof(uint));
+    new_obj->st = set_new(VECSET_INIT_CAPACITY);
 
     return new_obj;
 }
