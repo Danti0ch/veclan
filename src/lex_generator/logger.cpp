@@ -97,12 +97,12 @@ void debug_log(log_location loc, LOG_TYPE type, const char* string, ...){
     #if DLOG_TO_CONSOLE_ENABLED
 
     switch(type){
-        case INFO:{
+        case LOG_TYPE::INFO:{
             printf("\n%s[INFO] %s--%s--%s<%u>:: \n\t",
                 INFO_FONT, time_str, loc.file_name, loc.func_name, loc.n_line);
             break;
         }
-        case WARNING:{
+        case LOG_TYPE::WARNING:{
             printf("\n%s[WARNING] %s--%s--%s<%u>:: \n\t",
                 WARNING_FONT, time_str, loc.file_name, loc.func_name, loc.n_line);
             break;
@@ -232,15 +232,15 @@ void cdebug_log(LOG_TYPE type, const char* string, ...){
 	va_start(args, string);
 
     switch(type){
-        case INFO:{
+        case LOG_TYPE::INFO:{
             printf("%s[INFO]: ", INFO_FONT);
             break;
         }
-        case WARNING:{
+        case LOG_TYPE::WARNING:{
             printf("%s[WARNING]: ", WARNING_FONT);
             break;
         }
-        case ERROR:{
+        case LOG_TYPE::ERROR:{
             printf("%s[ERROR]: ", ERROR_FONT);
             break;
         }
@@ -322,7 +322,7 @@ void clog_init(CDUMP_OPTION logging_mode, const char* path){
         }
     }
 
-    DLOG(INFO, "Compiler logging initiated");
+    DLOG(LOG_TYPE::INFO, "Compiler logging initiated");
 
     return;
 }
@@ -334,7 +334,7 @@ void clog_close(){
         
         fclose(clog_file);
     }
-    DLOG(INFO, "Compiler logging closed");
+    DLOG(LOG_TYPE::INFO, "Compiler logging closed");
 
     return;
 }
@@ -354,7 +354,7 @@ int dlog_init(){
     }
     #endif //DLOG_TO_FILE_ENABLED
 
-    DLOG(INFO, "Logging initiated");
+    DLOG(LOG_TYPE::INFO, "Logging initiated");
 
     return 0;
 }
@@ -362,7 +362,7 @@ int dlog_init(){
 
 void dlog_close(){
 
-    DLOG(INFO, "Logging closed");
+    DLOG(LOG_TYPE::INFO, "Logging closed");
 
     #if DLOG_TO_FILE_ENABLED
     fclose(dlog_file);

@@ -1,0 +1,33 @@
+Date : 2022-08-27 23:45:41
+Directory : /home/plato/mipt_projs/veclan/src/lex_generator
+Total : 8 files,  123 codes, 8 comments, 53 blanks, all 184 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |          8 |        123 |          8 |         53 |        184 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                       | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                          |          8 |        123 |          8 |         53 |        184 |
+| structs                                                                    |          3 |         15 |          1 |          7 |         23 |
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                   | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/plato/mipt_projs/veclan/src/lex_generator/lex_graph.cpp              | C++      |         51 |          4 |         19 |         74 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/lex_graph.h                | C++      |          1 |          0 |          0 |          1 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/parser.cpp                 | C++      |         50 |          3 |         26 |         79 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/parser.h                   | C++      |          5 |          0 |          1 |          6 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/rec_descent.cpp            | C++      |          1 |          0 |          0 |          1 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/string_storage.cpp | C++      |          6 |          1 |          4 |         11 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/string_storage.h   | C++      |          4 |          0 |          1 |          5 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vector.h           | C++      |          5 |          0 |          2 |          7 |
+| Total                                                                      |          |        123 |          8 |         53 |        184 |
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+

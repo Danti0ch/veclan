@@ -69,7 +69,7 @@ Node* CreateAST(const string* RE_str){
     handler.n_symbs = handler.storage->len_buf;
 
     if(ISNULL(handler.storage)){
-        EDLOG(OPENING_FILE, "unable to open %s", input_file_name);
+        EDLOG(OPENING_FILE, "unable to open %s", RE_str->data);
     }
 
     if(isspace(cur_symb())) pass_symb();

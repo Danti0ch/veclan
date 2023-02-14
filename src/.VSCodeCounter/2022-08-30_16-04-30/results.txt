@@ -1,0 +1,81 @@
+Date : 2022-08-30 16:04:30
+Directory : /home/plato/mipt_projs/veclan/src
+Total : 51 files,  6844 codes, 1950 comments, 3236 blanks, all 12030 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         50 |      6,813 |      1,950 |      3,220 |     11,983 |
+| C        |          1 |         31 |          0 |         16 |         47 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                       | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                          |         51 |      6,844 |      1,950 |      3,236 |     12,030 |
+| Analyzer                                                                   |          4 |        528 |        433 |        247 |      1,208 |
+| InputHandler                                                               |          3 |         89 |         37 |         69 |        195 |
+| Structs                                                                    |         12 |      2,609 |        667 |      1,121 |      4,397 |
+| lex_generator                                                              |         25 |      3,119 |        726 |      1,574 |      5,419 |
+| lex_generator/structs                                                      |         15 |      1,503 |        400 |        798 |      2,701 |
++----------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                   | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/plato/mipt_projs/veclan/src/Analyzer/analyzer.cpp                    | C++      |         11 |          1 |          5 |         17 |
+| /home/plato/mipt_projs/veclan/src/Analyzer/analyzer.h                      | C++      |         24 |          4 |         12 |         40 |
+| /home/plato/mipt_projs/veclan/src/Analyzer/lexical_analyzer.cpp            | C++      |        135 |         28 |         66 |        229 |
+| /home/plato/mipt_projs/veclan/src/Analyzer/syntax_analyzer.cpp             | C++      |        358 |        400 |        164 |        922 |
+| /home/plato/mipt_projs/veclan/src/InputHandler/compiler_opts_parser.cpp    | C++      |         37 |         13 |         30 |         80 |
+| /home/plato/mipt_projs/veclan/src/InputHandler/input_handler.cpp           | C++      |         46 |         14 |         34 |         94 |
+| /home/plato/mipt_projs/veclan/src/InputHandler/input_handler.h             | C++      |          6 |         10 |          5 |         21 |
+| /home/plato/mipt_projs/veclan/src/Structs/hash_table.cpp                   | C++      |        555 |         38 |        212 |        805 |
+| /home/plato/mipt_projs/veclan/src/Structs/hash_table.h                     | C++      |        171 |          3 |         31 |        205 |
+| /home/plato/mipt_projs/veclan/src/Structs/list.cpp                         | C++      |        574 |        247 |        252 |      1,073 |
+| /home/plato/mipt_projs/veclan/src/Structs/list.h                           | C++      |        170 |         81 |         49 |        300 |
+| /home/plato/mipt_projs/veclan/src/Structs/node.cpp                         | C++      |        238 |         65 |        114 |        417 |
+| /home/plato/mipt_projs/veclan/src/Structs/node.h                           | C++      |         51 |         51 |         27 |        129 |
+| /home/plato/mipt_projs/veclan/src/Structs/stack.cpp                        | C++      |        292 |         31 |        147 |        470 |
+| /home/plato/mipt_projs/veclan/src/Structs/stack.h                          | C++      |        113 |          3 |         36 |        152 |
+| /home/plato/mipt_projs/veclan/src/Structs/text_storage.cpp                 | C++      |        298 |         56 |        167 |        521 |
+| /home/plato/mipt_projs/veclan/src/Structs/text_storage.h                   | C++      |         38 |         37 |         18 |         93 |
+| /home/plato/mipt_projs/veclan/src/Structs/vector.cpp                       | C++      |         87 |         17 |         51 |        155 |
+| /home/plato/mipt_projs/veclan/src/Structs/vector.h                         | C++      |         22 |         38 |         17 |         77 |
+| /home/plato/mipt_projs/veclan/src/compiler_unit.cpp                        | C++      |         30 |         16 |         21 |         67 |
+| /home/plato/mipt_projs/veclan/src/compiler_unit.h                          | C++      |         43 |         13 |         22 |         78 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/lex_graph.cpp              | C++      |        492 |         55 |        244 |        791 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/lex_graph.h                | C++      |         41 |          9 |         15 |         65 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/logger.cpp                 | C++      |        223 |         35 |        116 |        374 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/logger.h                   | C++      |         76 |         19 |         28 |        123 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/main.cpp                   | C++      |         20 |          6 |         11 |         37 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/parser.cpp                 | C++      |        468 |        101 |        228 |        797 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/parser.h                   | C++      |         35 |          1 |         15 |         51 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/rec_descent.cpp            | C++      |        224 |         99 |        102 |        425 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/rec_descent.h              | C++      |         15 |          0 |          8 |         23 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/spec_constants.h           | C++      |         22 |          1 |          9 |         32 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/node.cpp           | C++      |        219 |         44 |        119 |        382 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/node.h             | C++      |         53 |         56 |         29 |        138 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/set.cpp            | C++      |        100 |         16 |         47 |        163 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/set.h              | C++      |         19 |          9 |         15 |         43 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/stack.cpp          | C++      |        261 |         86 |        132 |        479 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/stack.h            | C++      |        110 |          3 |         34 |        147 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/string_storage.cpp | C++      |        103 |         21 |         69 |        193 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/string_storage.h   | C++      |         23 |          0 |          9 |         32 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/text_storage.cpp   | C++      |        315 |         50 |        180 |        545 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/text_storage.h     | C++      |         57 |         46 |         22 |        125 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/trash.c            | C        |         31 |          0 |         16 |         47 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vec_set.cpp        | C++      |         69 |         12 |         43 |        124 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vec_set.h          | C++      |         21 |          1 |          6 |         28 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vector.cpp         | C++      |         94 |         18 |         57 |        169 |
+| /home/plato/mipt_projs/veclan/src/lex_generator/structs/vector.h           | C++      |         28 |         38 |         20 |         86 |
+| /home/plato/mipt_projs/veclan/src/logger.cpp                               | C++      |        223 |         35 |        116 |        374 |
+| /home/plato/mipt_projs/veclan/src/logger.h                                 | C++      |         81 |         19 |         29 |        129 |
+| /home/plato/mipt_projs/veclan/src/main.cpp                                 | C++      |         14 |          2 |          9 |         25 |
+| /home/plato/mipt_projs/veclan/src/statement_data.cpp                       | C++      |         30 |          2 |          6 |         38 |
+| /home/plato/mipt_projs/veclan/src/statement_data.h                         | C++      |         78 |          0 |         22 |        100 |
+| Total                                                                      |          |      6,844 |      1,950 |      3,236 |     12,030 |
++----------------------------------------------------------------------------+----------+------------+------------+------------+------------+
