@@ -1,6 +1,0 @@
-def foo(){
-	a = 15;
-	b = 10;
-	qwer = 19;
-	call foo(ijk);
-}
