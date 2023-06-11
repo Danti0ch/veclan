@@ -1,0 +1,69 @@
+keyword {
+    if   {"if"}
+    else {"else"}
+    elif {"elif"}
+    for  {"for"}
+    def  {"def"}
+    ret  {"ret"}
+    call {"call"}
+    space_spec {"in"}
+    auto_type {"auto"}
+    const_spec {"const"}
+    vec_type   {"vec"}
+    object     {"obj"}
+    operator   {"oper"}
+    commutative_prop {"commutative"}
+    associative_prop {"associative"}
+    distributive_in_prop {"distributive_in"}
+    distributive_out_prop {"distributive_out"}
+    space_type {"space"}
+    null_vec   {"null_vec"}
+    null_scal  {"null_scal"}
+}
+
+standart_spaces {
+    ded_ring_space {"Z[1-9][0-9]*"}
+    fract_space    {"R"}
+    integer_space  {"Z"}
+    rational_space {"Q"}
+}
+
+operator {
+    add {"+"}
+    sub {"-"}
+    mul {"*"}
+    div {"/"}
+    pow {"^"}
+    assign {"="}
+    equal {"@@"}
+    uncover {"*"}
+    reverse {"reverse"}
+    field_access {"."}
+    capacity_taker {"?"}
+    above {">"}
+    s_above {">="}
+    under {"<"}
+    s_under {"<="}
+    or {"or"}
+    and {"and"}
+}
+
+ident  {"([a-z] | [A-Z] | _)([a-z] | [A-Z] | _ | [0-9])*"}
+
+number {
+    integer {"-*([0-9])*"}
+    fractional {"-*([0-9])*.([0-9])*"}
+}
+
+separator {
+
+    scope_open  {"{"}
+    scope_close {"}"}
+    expr_close  {";"}
+    linear_shell_open  {"<"}
+    linear_shell_close {">"}
+    ident_separator    {","}
+    r_bracket_open     {"\("}
+    r_bracket_close    {"\)"}
+    property_list_dec {":"}
+}

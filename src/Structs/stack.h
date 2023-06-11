@@ -44,12 +44,6 @@ enum class POISONS{
 	DATA_CANARY_AFTER_DESTRUCTOR	= 0xBA5ED03
 };
 
-typedef int TYPE_STACK;
-
-#define TYPE_STACK_specif "%d"
-const char TYPE_NAME[] = "int";
-const TYPE_STACK POISON_ELEM = -111;
-
 struct stack_location_info{
 	
 	size_t init_n_line;
@@ -66,12 +60,14 @@ struct stack_t{
 
 	#endif
 
-		size_t           	 capacity;
-		size_t           	 size;
+		size_t       capacity;
+		size_t       size;
 
-		TYPE_STACK*      	 data;
-		char*		     	 begin_data;
-		
+		void*      	 data;
+		char*		 begin_data;
+
+        size_t       elem_size;
+
 	#if PROTECTION_LVL2
 		uint32_t     hash_value;
 	#endif
@@ -92,18 +88,17 @@ struct stack_t{
 	(stack)->location_info.init_func_name = (char*)func_name;		\
 	(stack)->location_info.stack_name     = (char*)stack_name;	    \
 
-
-#define StackConstructor(cap) _StackConstructor((cap), "unnamed", LOCATION)
+#define StackConstructor(cap, elem_size) _StackConstructor((cap), (elem_size), "unnamed", LOCATION)
 #define StackDestructor(obj) _StackDestructor((obj), #obj, LOCATION)
 #define StackPush(obj, elem) _StackPush((obj), #obj, LOCATION, (elem))
 #define StackPop(obj) _StackPop((obj), #obj, LOCATION)
 #define StackTop(obj) _StackTop((obj), #obj, LOCATION)
 	
-stack_t* _StackConstructor(size_t init_capacity, STACK_LOC_PARAMS);
+stack_t* _StackConstructor(size_t init_capacity, size_t elem_size, STACK_LOC_PARAMS);
 void _StackDestructor(stack_t *stack, STACK_LOC_PARAMS);
-void _StackPush(stack_t *stack, STACK_LOC_PARAMS, const TYPE_STACK new_elem);
-TYPE_STACK _StackPop(stack_t *stack, STACK_LOC_PARAMS);
-TYPE_STACK _StackTop(stack_t* stack, STACK_LOC_PARAMS);
+void _StackPush(stack_t *stack, STACK_LOC_PARAMS, const void* new_elem);
+void  _StackPop(stack_t *stack, STACK_LOC_PARAMS);
+void* _StackTop(stack_t* stack, STACK_LOC_PARAMS);
 size_t GetStackSize(stack_t* stack);
 
 void stack_dump(const stack_t *stack, const int err_code, const int n_line, const char *file_name, const char* func_name,

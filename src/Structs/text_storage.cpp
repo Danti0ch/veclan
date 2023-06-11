@@ -6,21 +6,10 @@
 
 #include "text_storage.h"
 #include <ctype.h>
-#include "../logger.h"
+#include "logger.h"
 
 //----------------------LOCAL-FUNCTIONS-DECLARATION-----------------------//
 
-
-/**
- * получает количество строк и символов файла
- * 
- * \param file_name имя файла, размер которого нужно узнать
- * \param n_lines указатель на переменную, куда нужно записать количество строк в файле
- * \param len указатель на переменную, куда нужно записать количество символов в файле
- * 
- * \return код ошибки или успеха
- */
-err_code get_file_metadata(const char *file_name, size_t *n_lines, size_t *len, size_t* n_words);
 
 void get_buffer_metadata(const char* buffer, const size_t buf_size, size_t* n_lines, size_t* n_words);
 
@@ -58,7 +47,7 @@ text_storage* text_storage_init(const size_t buf_size, const size_t n_lines, con
 
     storage->p_lines = (line_storage*)calloc(n_lines, sizeof(line_storage));
     storage->p_words = (word*)calloc(n_words, sizeof(word));
-    storage->buffer  = (char*)calloc(buf_size, sizeof(char));
+    storage->buffer  = (char*)calloc(buf_size + 1, sizeof(char));
 
     assert(storage->p_lines != NULL && storage->buffer != NULL && storage->p_words != NULL);
 
@@ -73,10 +62,9 @@ text_storage* GetStorage(const char *file_name){
 
     size_t n_lines = 0, buf_size = 0, n_words = 0;
 
-    get_file_metadata(file_name, &n_lines, &buf_size, &n_words);
+    GetFileMeta(file_name, &n_lines, &buf_size, &n_words);
 
-    text_storage* storage = text_storage_init(buf_size, n_lines, n_words);
-    
+    text_storage* storage = text_storage_init(buf_size + 1, n_lines, n_words);
 
     //if(mem_for_storage_result != OK)    assert(0);
 
@@ -103,15 +91,16 @@ text_storage* GetStorage(const char *buffer, const size_t buf_size){
     // TODO:
     get_buffer_metadata(buffer, buf_size, &n_lines, &n_words);
 
+    //!
     text_storage* storage = text_storage_init(buf_size, n_lines, n_words);
 
     //if(mem_for_storage_result != OK)    assert(0);
 
     memcpy(storage->buffer, buffer, buf_size * sizeof(char));
-
+    
     // TODO: rename ???
     construct_auxil_arrays(storage);    
-
+    
     return storage;
 }
 //----------------------------------------------------------------------------------------//
@@ -226,9 +215,7 @@ err_code TextStorageRemove(text_storage *storage){
 }
 //----------------------------------------------------------------------------------------//
 
-//----------------------LOCAL-FUNCTIONS-DEFINITIONS----------------------//
-
-err_code get_file_metadata(const char *file_name, size_t *n_lines, size_t *len, size_t* n_words){
+err_code GetFileMeta(const char *file_name, size_t *n_lines, size_t *len, size_t* n_words){
 
     assert(file_name != NULL);
 
@@ -240,19 +227,13 @@ err_code get_file_metadata(const char *file_name, size_t *n_lines, size_t *len, 
     *n_lines = 0;
     *n_words = 0;
 
-    FILE *text_file = fopen(file_name, "r");
+    size_t file_size = GetFileSize(file_name);
 
-    if(text_file == NULL) EDLOG(OPENING_FILE, "unable to find %s", file_name);
-    fseek(text_file, 0, SEEK_END);
-
-    size_t file_size = ftell(text_file);
-
-    if(file_size <= 0){
-        fclose(text_file);
+    if(file_size == 0){
         return EMPTY_FILE;
-    }
+    }    
 
-    fseek(text_file, 0, SEEK_SET);
+    FILE* text_file = fopen(file_name, "r");
 
     char *buffer = (char*)calloc(file_size + 2, sizeof(char));
 
@@ -284,6 +265,31 @@ err_code get_file_metadata(const char *file_name, size_t *n_lines, size_t *len, 
     return R;
 }
 //----------------------------------------------------------------------------------------//
+
+string* GenerateBuffer(const char* file_name){
+
+    NASSERT(file_name);
+
+    size_t file_size = GetFileSize(file_name);
+
+    char* buffer = (char*)calloc(file_size, sizeof(char));
+    if(ISNULL(buffer)) ESDLOG(ALLOC_MEM);
+
+    FILE* cur_file = fopen(file_name, "r");
+    if(ISNULL(buffer)) ESDLOG(OPENING_FILE);
+
+    size_t n_readen_bytes = fread(buffer, sizeof(char), file_size, cur_file);
+
+    string* obj = StringCtor(buffer, n_readen_bytes);
+    return obj;
+}
+//----------------------------------------------------------------------------------------//
+
+//========================================================================================//
+
+//                          LOCAL_FUNCTIONS_DEFINITION
+
+//========================================================================================//
 
 #define min(a, b) ((a) > (b)) ? (b) : (a)
 
@@ -338,7 +344,7 @@ void construct_auxil_arrays(text_storage* storage){
 
     assert(storage != NULL);
 
-    storage->buffer[storage->len_buf - 1] = '\n';
+    // storage->buffer[storage->len_buf - 1] = '\n';
 
     uint    n_lines         = storage->n_lines;
     uint    n_line          = 0;
@@ -516,5 +522,22 @@ size_t get_align_buf_size(text_storage* storage){
     }
 
     return len;
+}
+//----------------------------------------------------------------------------------------//
+
+size_t GetFileSize(const char* file_name){
+    
+    NASSERT(file_name);
+
+    FILE *text_file = fopen(file_name, "r");
+
+    if(ISNULL(text_file)) EDLOG(OPENING_FILE, "unable to find %s", file_name);
+    fseek(text_file, 0, SEEK_END);
+
+    size_t file_size = ftell(text_file);
+
+    fclose(text_file);
+
+    return file_size;
 }
 //----------------------------------------------------------------------------------------//

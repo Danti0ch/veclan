@@ -6,9 +6,9 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <stdio.h>
 #include <string.h>
-#include "../logger.h"
-#include "../statement_data.h"
+#include "logger.h"
 
 #define SIMPLE_DUMP   0
 #define DETAILED_DUMP 1
@@ -17,14 +17,20 @@
 #define DUMP_MODE SIMPLE_DUMP
 #endif
 
+//#define IS_DUMP_DETAILED (DUMP_MODE == DETAILED DUMP)
+
 /**
- * энам, для определения положения узла относительно родителя
+ * константы для определения положения узла относительно родителя
  */
 enum class NODE_PLACE{
 	LEFT,
 	RIGHT
 };
 
+// TODO: fix dynamic memory ???
+// [1] 1 structure-storage for all nodes in tree(tree structure)
+// [2] динамическое хранение данных в памяти
+// 3) строгая типизация???
 /**
  * структура узла
  */
@@ -34,7 +40,8 @@ struct Node{
 	Node*      right;   //!< указатель на правого потомка
 	Node*      parent;  //!< указатель на родителя
 
-	lexem*      value;   //!< указатель на узел в буфере
+	void*      val;   //!< указатель на узел в буфере
+	size_t 	   elem_size;
 
 	NODE_PLACE place;   //!< задаёт положение узла относительно родителя
 };
@@ -48,16 +55,16 @@ const int  FILE_NAME_LEN        = 40;
 
 //------------PUBLIC-FUNCTIONS-DECLARATION------------------------
 
-Node* NodeCtor(Node* parent, lexem* val, NODE_PLACE place);
+Node* NodeCtor(Node* parent, void* val, size_t elem_size, NODE_PLACE place);
 
-Node* NodeCtor(lexem* val);
-Node* NodeCtor(lexem* val, Node* l_son, Node* r_son);
+Node* NodeCtor(void* val, size_t elem_size);
+Node* NodeCtor(void* val, size_t elem_size, Node* l_son, Node* r_son);
 
-Node* NodeCtor();
+Node* NodeCtor(size_t elem_size);
 /**
  * удаляет узел, без удаления потомков
  */
-void NodeDtor(Node* nod);
+void NodeDtor(Node* node);
 
 /**
  * удаляет узел и потомков
@@ -94,10 +101,12 @@ void BreakConnWithParent(Node* son);
  */
 void BreakConnWithSon(Node* parent, NODE_PLACE place);
 
+void NodeSwap(Node* node1, Node* node2);
+
 /**
  * создаёт картинку с дампом узла node со всеми потомками
  */
-void DumpNode(Node* node);
+void DumpNode(Node* node, void (*print_func)(FILE*, uint, const Node*));
 
 //__________________________________________________________________
 /**

@@ -23,7 +23,7 @@ const uint MAX_FLAG_NAME_LEN    = 0x100;
 const uint FLAGS_NUM            = 1;
 
 // TODO: test
-const uint MAX_FILE_NAME_LEN    = 0x10;
+const uint MAX_FILE_NAME_LEN    = 256;
 
 const uint INIT_STACK_ERRORS_SIZE = 0x8;
 const uint INIT_LEXEM_ARRAY_SIZE  = 0x200;
@@ -59,7 +59,7 @@ struct gvl_unit{
 
     vector* lexems;
     ast_tree*   ast;
-    text_storage* text_data;
+    string* text_data;
 
     HTable* name_table;
 
@@ -72,6 +72,8 @@ struct gvl_unit{
 
 gvl_unit* GvlUnitConstructor();
 void GvlUnitDestructor(gvl_unit* obj);
-void PushLexem(gvl_unit* obj, const lexem* lex);
+void GvlDump(const gvl_unit* obj);
+
+// void PushLexem(gvl_unit* obj, const lexem* lex);
 
 #endif  // COMPILER_UNIT_H  

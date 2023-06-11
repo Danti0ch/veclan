@@ -1,6 +1,7 @@
 #include "input_handler.h"
 #include <assert.h>
 #include <string.h>
+#include "text_storage.h"
 
 //========================================================================================//
 
@@ -8,7 +9,7 @@
 
 //========================================================================================//
 
-void parse_flags(compiler_options* cur_compil_status, const int argc, const char* argv[]);
+void parse_flags(gvl_unit* gvl, const int argc, const char* argv[]);
 
 //========================================================================================//
 
@@ -67,7 +68,7 @@ void parse_flags(gvl_unit* gvl, const int argc, const char* argv[]){
             }
         }
         else{
-
+            ;
         }
     }
     
@@ -77,3 +78,24 @@ void parse_flags(gvl_unit* gvl, const int argc, const char* argv[]){
 }
 //----------------------------------------------------------------------------------------//
 
+void ReadText(gvl_unit* gvl) {
+    NASSERT(gvl);
+    NASSERT(gvl->input_file_name);
+
+    size_t file_size = GetFileSize(gvl->input_file_name);
+
+    DLOG(LOG_TYPE::INFO, "Size of read file: %llu", file_size);
+
+    gvl->text_data = StringCtor(file_size);
+
+    FILE *input_file = fopen(gvl->input_file_name, "r");
+    assert(input_file != NULL);
+
+    int reading_status = fread(gvl->text_data->data, sizeof(char), file_size, input_file);
+    gvl->text_data->size = file_size;
+    assert(reading_status >= 0);
+
+    fclose(input_file);
+
+    return;
+}

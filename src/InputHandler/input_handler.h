@@ -14,6 +14,10 @@
 
 #include "../compiler_unit.h"
 
+static gvl_flag gvl_flags[FLAGS_NUM] = {
+    {"-o", ASSIGN_NAME}
+};
+
 void ReadText(gvl_unit* gvl);
 void FillCompilerOpts(gvl_unit* gvl, const int argc, const char* argv[]);
 

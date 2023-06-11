@@ -9,7 +9,7 @@ void InitAnalyze(gvl_unit* gvl){
     DLOG(INFO, "analyzing phase initiated");
 
     FillLexemArr(gvl);
-    GenerateAST(gvl);
+    // GenerateAST(gvl);
     DLOG(INFO, "analyzing phase finished, found %lu errors", GetStackSize(gvl->errors));
     return;
 }

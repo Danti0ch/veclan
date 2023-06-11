@@ -17,7 +17,8 @@ int main(const int argc, const char* argv[]){
 
     InitAnalyze(gvl);
     
-    GvlUnitDestructor(gvl);
+    GvlDump(gvl);
+    // GvlUnitDestructor(gvl);
 
     LogClose();
     return 0;

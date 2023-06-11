@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
+#include "qute_lexer.h"
 
 static lex_handler_unit lh_unit = {{}, {}, 0, 0, 0};
 
@@ -24,14 +25,6 @@ static lex_handler_unit lh_unit = {{}, {}, 0, 0, 0};
 //========================================================================================//
 
 // TODO: unite parse keyword, separ, oper functions(cringe)
-static void extract_lexem(gvl_unit* gvl);
-static PARSE_RES parse_ident();
-static PARSE_RES parse_digit();
-static PARSE_RES parse_keyword();
-static PARSE_RES parse_operator();
-static PARSE_RES parse_separator();
-static PARSE_RES parse_lang_ident(const LEXEM_TYPE type);
-
 inline int check_ident_symb(char symb){
     if(isalpha(symb) || isdigit(symb) || symb == '_') return 1;
 
@@ -43,186 +36,60 @@ inline int check_ident_symb(char symb){
 
 //========================================================================================//
 
+inline int isspace(char symb){
+
+    if(symb == ' ' || symb == '\t' || symb == '\n' || symb == 0) return 1;
+    return 0;
+}
+//----------------------------------------------------------------------------------------//
+
 void FillLexemArr(gvl_unit* gvl){
     
     assert(gvl != NULL);
     CLOG(INFO, "Attempt to extract lexems");
+    
+    char* buff = gvl->text_data->data; 
 
-    const text_storage* text_data = gvl->text_data;
+    size_t text_size = gvl->text_data->size;
+    uint offset = 0;
+    uint cur_offset = 0;
+    unsigned long long tag = 0, subtag = 0;
+    uint n_line = 0, n_col = 0;
+    uint line_offset = 0;
 
-    uint n_lines = text_data->n_lines;
+    while(offset < text_size) {
 
-    for(uint n_line = 0; n_line < n_lines; n_line++){
+        LEXER_RET_CODE res = parse_lexem(buff + offset, &cur_offset, &tag, &subtag);
 
-        word* p_words = text_data->p_lines[n_line].p_words;
-        uint n_words = text_data->p_lines[n_line].n_words;
+        if(res == LEXER_RET_CODE::OK) {
+            lexem new_lexem = {
+                .tag = (uint)tag, .subtag = (uint)subtag,
+                .str_bufpos = buff + offset, .str_buflen = cur_offset,
+                .n_line = n_line, .n_col = line_offset
+            };
 
-        for(uint n_word = 0; n_word < n_words; n_word++){
+            VectorPush(gvl->lexems, &new_lexem);
 
-            lh_unit.cur_symb    = 0;
-            lh_unit.data        = p_words[n_word];
+            offset += cur_offset;
+            line_offset += cur_offset;
 
-            extract_lexem(gvl);
+            // skipping spaces
+            while(offset < text_size && isspace(buff[offset])){
 
-            memset(lh_unit.cur_lexem.ident, 0, MAX_LEXEM_STR_SIZE);
-            lh_unit.cur_word++;
+                if(buff[offset] == '\n'){
+                    n_line++;
+                    line_offset = 0;
+                }
+                offset++;
+            }
         }
-        lh_unit.cur_line++;
-        lh_unit.cur_lexem.n_col  = 0;
-        lh_unit.cur_lexem.n_line++;
+        else {
+            printf("%.*s %u %u %u\n", 5, buff + offset, n_line, line_offset, offset);
+            assert(0); // todo:
+        }
     }
-
+    
     CLOG(INFO, "Succesful extracting of lexems");
     return;
-}
-
-//========================================================================================//
-
-//                          LOCAL_FUNCTIONS_DEFINITION
-
-//========================================================================================//
-
-static void extract_lexem(gvl_unit* gvl){
-
-    if(lh_unit.data.len > MAX_LEXEM_STR_SIZE){
-        CLOG(WARNING, "UNDEFINIED: %s", lh_unit.data.pt);
-        return;
-    }
-
-    while(lh_unit.cur_symb < lh_unit.data.len){
-        if(parse_operator()       != PARSE_RES::FAILED){
-            ;
-        }
-        else if(parse_separator() != PARSE_RES::FAILED){
-            ;
-        }
-        else if(parse_digit()     != PARSE_RES::FAILED){
-            ;
-        }
-        else if(parse_keyword()   != PARSE_RES::FAILED){
-            ;
-        }
-        else if(parse_ident()     != PARSE_RES::FAILED){
-            ;
-        }
-        else{
-            CLOG(WARNING, "UNDEFINIED: %s", lh_unit.data.pt);
-            break;
-        }
-
-        PushLexem(gvl, &(lh_unit.cur_lexem));
-    }
-
-    return;
-}
-//----------------------------------------------------------------------------------------//
-
-static PARSE_RES parse_ident(){
-
-    uint cur_symb = lh_unit.cur_symb;
-
-    if(!isalpha(lh_unit.data.pt[cur_symb])) return PARSE_RES::FAILED;
-
-    lh_unit.cur_lexem.type = LEXEM_TYPE::IDENT;
-
-    for(; cur_symb < lh_unit.data.len; cur_symb++){
-        if(check_ident_symb(lh_unit.data.pt[cur_symb]) == 0) break;
-    }
-
-    // TODO: hash mb??
-    strncpy(lh_unit.cur_lexem.ident, lh_unit.data.pt + lh_unit.cur_symb, cur_symb - lh_unit.cur_symb);
-
-    lh_unit.cur_symb = cur_symb;
-
-    CLOG(INFO, "IDENT: %s", lh_unit.cur_lexem.ident);
-
-    return PARSE_RES::OK;
-}
-//----------------------------------------------------------------------------------------//
-
-static PARSE_RES parse_digit(){
-
-    uint cur_symb = lh_unit.cur_symb;
-
-    if(!isdigit(lh_unit.data.pt[cur_symb]) && lh_unit.data.pt[cur_symb] != '-')    return PARSE_RES::FAILED;
-
-    lh_unit.cur_lexem.type = LEXEM_TYPE::DIGIT_VALUE;
-
-    cur_symb++;
-
-    for(; cur_symb < lh_unit.data.len; cur_symb++){
-        if(!isdigit(lh_unit.data.pt[cur_symb])) break;
-    }
-
-    char save_symb = lh_unit.data.pt[cur_symb];
-    lh_unit.data.pt[cur_symb] = 0;
-
-    int64_t val = atol(lh_unit.data.pt + lh_unit.cur_symb);
-    lh_unit.data.pt[cur_symb] = save_symb;
-    
-    lh_unit.cur_lexem.digit = val;
-    lh_unit.cur_symb = cur_symb;
-
-    CLOG(INFO, "DIGIT: %ld", val);
-    return PARSE_RES::OK;
-}
-//----------------------------------------------------------------------------------------//
-
-static PARSE_RES parse_operator(){
-    
-    PARSE_RES res = parse_lang_ident(LEXEM_TYPE::OPERATOR);
-    return res;
-}
-//----------------------------------------------------------------------------------------//
-
-static PARSE_RES parse_separator(){
-    
-    PARSE_RES res = parse_lang_ident(LEXEM_TYPE::SEPARATOR);
-    return res;
-}
-//----------------------------------------------------------------------------------------//
-
-static PARSE_RES parse_keyword(){
-    
-    PARSE_RES res = parse_lang_ident(LEXEM_TYPE::KEYWORD);
-    return res;
-}
-//----------------------------------------------------------------------------------------//
-
-static PARSE_RES parse_lang_ident(const LEXEM_TYPE type){
-
-    const char*  p_str  = lh_unit.data.pt + lh_unit.cur_symb;
-    const size_t len    = lh_unit.data.len;
-
-    for(uint n_ident = 0; n_ident < N_STATEMENTS; n_ident++){
-
-        if(STATEMENT_DATA[n_ident].type != type) continue;
-        
-        // TODO: !!!!!!!!!!!!!!!!!!!! FIX TOO SLOW STRLEN
-        size_t ident_len = strlen(STATEMENT_DATA[n_ident].str);
-
-        if(len < ident_len) continue;
-
-        if(strncmp(p_str, STATEMENT_DATA[n_ident].str, ident_len) == 0){
-            lh_unit.cur_symb += ident_len;
-            
-            lh_unit.cur_lexem.type  = type;
-            lh_unit.cur_lexem.id    = STATEMENT_DATA[n_ident].id;
-
-            if(type == LEXEM_TYPE::KEYWORD){
-                CLOG(INFO, "KEYWORD: %s", STATEMENT_DATA[n_ident].str);
-            }
-            else if(type == LEXEM_TYPE::OPERATOR){
-                CLOG(INFO, "OPERATOR: %s", STATEMENT_DATA[n_ident].str);
-            }
-            else if(type == LEXEM_TYPE::SEPARATOR){
-                CLOG(INFO, "SEPARATOR: %s", STATEMENT_DATA[n_ident].str);
-            }
-
-            return PARSE_RES::OK;
-        }
-    }
-
-    return PARSE_RES::FAILED;
 }
 //----------------------------------------------------------------------------------------//

@@ -1,6 +1,7 @@
 #include "stack.h"
 #include "logger.h"
 #include <assert.h>
+#include <string.h>
 
 //========================================================================================//
 
@@ -30,7 +31,7 @@ static void dump_stack_data(const stack_t *stack);
 
 //========================================================================================//
 
-stack_t* _StackConstructor(size_t init_capacity, STACK_LOC_PARAMS){
+stack_t* _StackConstructor(size_t init_capacity, size_t elem_size, STACK_LOC_PARAMS){
 
 	assert(init_capacity != 0);
 
@@ -45,6 +46,7 @@ stack_t* _StackConstructor(size_t init_capacity, STACK_LOC_PARAMS){
 	obj->capacity = init_capacity;
 	obj->size = 0;
 	obj->data = NULL;
+    obj->elem_size = elem_size;
 
 	get_init_mem(obj, init_capacity);
 
@@ -69,8 +71,10 @@ void _StackDestructor(stack_t *stack, STACK_LOC_PARAMS){
 	STACK_VERIFY(stack)
 
 	free(stack->begin_data);
+	free(stack);
 
-	stack->data                  = (TYPE_STACK*)POISONS::DATA_AFTER_DESTRUCTOR;
+	/*
+	stack->data                  = POISONS::DATA_AFTER_DESTRUCTOR;
 	stack->begin_data			 = (char*)POISONS::DATA_AFTER_DESTRUCTOR;
 
 	#if PROTECTION_LVL1
@@ -82,16 +86,18 @@ void _StackDestructor(stack_t *stack, STACK_LOC_PARAMS){
 
 	stack->capacity = 0;
 	stack->size     = 0;
-	
+	stack->
 	#if PROTECTION_LVL2
 		stack->hash_value = 0;
 	#endif
+	*/
 
 	return;
 }
 //----------------------------------------------------------------------------------------//
 
-void _StackPush(stack_t *obj, STACK_LOC_PARAMS, const TYPE_STACK new_elem){
+#include <stdio.h>
+void _StackPush(stack_t *obj, STACK_LOC_PARAMS, const void* new_elem){
 
     // ?
 	LOC_PARAMS_TO_STACK(obj)
@@ -102,7 +108,8 @@ void _StackPush(stack_t *obj, STACK_LOC_PARAMS, const TYPE_STACK new_elem){
 		increase_capacity(obj);
 	}
 
-	obj->data[obj->size++] = new_elem;
+	memcpy((char*)obj->data + obj->size * obj->elem_size, new_elem, obj->elem_size);
+	obj->size++;
 	
 	#if PROTECTION_LVL2
 		obj->hash_value = get_hash(obj);
@@ -113,7 +120,7 @@ void _StackPush(stack_t *obj, STACK_LOC_PARAMS, const TYPE_STACK new_elem){
 }
 //----------------------------------------------------------------------------------------//
 
-TYPE_STACK _StackPop(stack_t *stack, STACK_LOC_PARAMS){
+void _StackPop(stack_t *stack, STACK_LOC_PARAMS){
 	
 	LOC_PARAMS_TO_STACK(stack)
 
@@ -121,13 +128,11 @@ TYPE_STACK _StackPop(stack_t *stack, STACK_LOC_PARAMS){
 
     if(stack->size == 0) EDLOG(OWN, "attempt to pop stack with size 0");
 
-	TYPE_STACK upper_elem = stack->data[stack->size - 1];
-
 	if(REDUCE_CAPACITY_RATIO * (stack->size) < stack->capacity){
         reduce_capacity(stack);
 	}
 	else{
-		stack->data[stack->size - 1] = POISON_ELEM;
+		;//stack->data[stack->size - 1] = POISON_ELEM;
 	}
 
 	stack->size--;
@@ -137,11 +142,11 @@ TYPE_STACK _StackPop(stack_t *stack, STACK_LOC_PARAMS){
 	#endif
 
 	STACK_VERIFY(stack)
-    return upper_elem;
+    return;
 }
 //----------------------------------------------------------------------------------------//
 
-TYPE_STACK _StackTop(stack_t* stack, STACK_LOC_PARAMS){
+void* _StackTop(stack_t* stack, STACK_LOC_PARAMS){
 
 	LOC_PARAMS_TO_STACK(stack)
 
@@ -149,12 +154,10 @@ TYPE_STACK _StackTop(stack_t* stack, STACK_LOC_PARAMS){
 
     if(stack->size == 0) EDLOG(OWN, "attempt to pop stack with size 0");
 
-	TYPE_STACK upper_elem = stack->data[stack->size - 1];
 	// assert(upper_elem != POISON_ELEM);
 
-	STACK_VERIFY(stack)
-
-    return upper_elem;
+    return (char*)stack->data + (stack->size - 1) * stack->elem_size;
+;
 }
 //----------------------------------------------------------------------------------------//
 
@@ -179,31 +182,32 @@ static void increase_capacity(stack_t *stack){
 	stack->capacity *= INCREASE_CAPACITY_RATIO;
 	
 	#if PROTECTION_LVL1
-		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * sizeof(TYPE_STACK) + 2 * sizeof(CANARY));
+		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * stack->elem_size + 2 * sizeof(CANARY));
 		CHECKALLOC(p_new_memory)
 
 		stack->begin_data        = p_new_memory; 
 		stack->data_canary_left  = (CANARY*)(p_new_memory);
-		stack->data              = (TYPE_STACK*)(p_new_memory + sizeof(CANARY));
-		stack->data_canary_right = (CANARY*)(p_new_memory + stack->capacity * sizeof(TYPE_STACK) + sizeof(CANARY));
+		stack->data              = (char*)p_new_memory + sizeof(CANARY);
+		stack->data_canary_right = (CANARY*)(p_new_memory + stack->capacity * stack->elem_size + sizeof(CANARY));
 
 		*(stack->data_canary_left)  = VALID_CANARY_VALUE;
 		*(stack->data_canary_right) = VALID_CANARY_VALUE;
 
 	#else
-		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * sizeof(TYPE_STACK));		
+		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * stack->elem_size);		
         CHECKALLOC(p_new_memory)
-
 		
 		stack->begin_data = p_new_memory;
-		stack->data = (TYPE_STACK*)(p_new_memory);
+		stack->data = p_new_memory;
 		
 	#endif // PROTECTION_LVL1
 
+	/*
 	for(int i = stack->size; i < stack->capacity; i++){
 		stack->data[i] = POISON_ELEM;
 	}
-	
+	*/
+
 	p_new_memory = NULL;
 
 	// или так, или не верифицировать в конце
@@ -223,25 +227,25 @@ static void reduce_capacity(stack_t *stack){
 	stack->capacity /= REDUCE_CAPACITY_RATIO;
 
 	#if PROTECTION_LVL1
-		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * sizeof(TYPE_STACK) + 2 * sizeof(CANARY));
+		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * stack->elem_size + 2 * sizeof(CANARY));
 		
 		CHECKALLOC(p_new_memory)
 
 		stack->begin_data 		  = p_new_memory;
 		stack->data_canary_left   = (CANARY*)(p_new_memory);
-		stack->data 			  = (TYPE_STACK*)(p_new_memory + sizeof(CANARY));
-		stack->data_canary_right  = (CANARY*)(p_new_memory + stack->capacity * sizeof(TYPE_STACK) + sizeof(CANARY));
+		stack->data 			  = (char*)p_new_memory + sizeof(CANARY);
+		stack->data_canary_right  = (CANARY*)(p_new_memory + stack->capacity * stack->elem_size + sizeof(CANARY));
 		
 		*(stack->data_canary_left)  = VALID_CANARY_VALUE;
 		*(stack->data_canary_right) = VALID_CANARY_VALUE;
 	
 	#else
-		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * sizeof(TYPE_STACK));
+		char *p_new_memory = (char*)realloc(stack->begin_data, stack->capacity * stack->elem_size);
 		
 		CHECKALLOC(p_new_memory)
 
 		stack->begin_data = p_new_memory;
-		stack->data = (TYPE_STACK*)p_new_memory;
+		stack->data = p_new_memory;
 
 	#endif // PROTECTION_LVL1
 
@@ -262,29 +266,30 @@ static void get_init_mem(stack_t *stack, size_t init_capacity){
 	assert(stack != NULL);
 
 	#if PROTECTION_LVL1
-		char *p_new_memory = (char*)calloc(init_capacity * sizeof(TYPE_STACK) + 2 * sizeof(CANARY), sizeof(char));
+		char *p_new_memory = (char*)calloc(init_capacity * stack->elem_size + 2 * sizeof(CANARY), sizeof(char));
 		CHECKALLOC(p_new_memory)
 
 		stack->begin_data           = p_new_memory;
 		stack->data_canary_left     = (CANARY*)(p_new_memory);
-		stack->data                 = (TYPE_STACK*)(p_new_memory + sizeof(CANARY));
-		stack->data_canary_right    = (CANARY*)(p_new_memory + init_capacity * sizeof(TYPE_STACK) + sizeof(CANARY));
+		stack->data                 = (char*)p_new_memory + sizeof(CANARY);
+		stack->data_canary_right    = (CANARY*)(p_new_memory + init_capacity * stack->elem_size + sizeof(CANARY));
 
 		*(stack->data_canary_left)  = VALID_CANARY_VALUE;
 		*(stack->data_canary_right) = VALID_CANARY_VALUE;
 
 	#else
-		char *p_new_memory = (char*)calloc(init_capacity * sizeof(TYPE_STACK), sizeof(char));
+		char *p_new_memory = (char*)calloc(init_capacity * stack->elem_size, sizeof(char));
 		CHECKALLOC(p_new_memory)
 		
 		stack->begin_data = p_new_memory;
-		stack->data 	  = (TYPE_STACK*)(p_new_memory);
+		stack->data 	  = p_new_memory;
 		
 	#endif // PROTECTION_LVL1
-
+	/*
 	for(int i = 0; i < stack->capacity; i++){
 		stack->data[i] = POISON_ELEM;
 	}
+	*/
 	return;
 }
 //----------------------------------------------------------------------------------------//
@@ -348,13 +353,13 @@ static ST_ERROR_CODE stack_error(const stack_t *stack){
 	if(stack->data == NULL || stack->begin_data == NULL){
 		return ST_ERROR_CODE::DATA_IS_NULL;
 	}
-
+/*
 	if(stack->data       == (TYPE_STACK*)POISONS::DATA_AFTER_DESTRUCTOR || 
 	   stack->begin_data == (char*)POISONS::DATA_AFTER_DESTRUCTOR){
 
 		return ST_ERROR_CODE::STACK_WAS_DESTR;
 	}
-
+*/
 	if(stack->capacity < stack->size){
 		return ST_ERROR_CODE::NOT_VALID_CAPACITY;
 	}
@@ -393,11 +398,11 @@ void stack_dump(const stack_t *stack, const int err_code, const int n_line, cons
     MDLOG( "===========STACK VERIFICATION===============");
 	MDLOG( "[#]\tLIBRARY FUNCTION: %s(\"%s\"(%d))\n"
 			"[#]\tDATE: %s | %s\n"
-		    "stack_t<%s> %s(%s) from function \"%s\"(file %s(%d))\n"
+		    "stack_t %s(%s) from function \"%s\"(file %s(%d))\n"
 			"adress = [%x]\n\n",
 			func_name, file_name, n_line,
 			date, time,
-			TYPE_NAME, stack->location_info.stack_name, err_code == (int)ERROR_CODE::OK ? "ok" : "ERROR", stack->location_info.init_func_name, stack->location_info.init_file_name,
+			stack->location_info.stack_name, err_code == (int)ERROR_CODE::OK ? "ok" : "ERROR", stack->location_info.init_func_name, stack->location_info.init_file_name,
 			stack->location_info.init_n_line, 
 			stack);
 
@@ -407,12 +412,12 @@ void stack_dump(const stack_t *stack, const int err_code, const int n_line, cons
 						"___________________|_______________|_____________\n"
 					#if PROTECTION_LVL1
 						"canary_left        | %-14llx| [%d]\n"
-						"canary_right       | %-14llx| [%d]\n"
+						"canary_right       | %-14llx| [%d]\n"de.o ldescent.o -o durex
 					#endif
 						
 						"size               | %-14d| [%d]\n"
 						"capacity           | %-14d| [%d]\n"
-						
+						"elem_size 		    | %-14lu| [%d]\n"
 					#if PROTECTION_LVL2
 						"hash_value         | %-14lx| [%d]\n"
 					#endif
@@ -431,7 +436,8 @@ void stack_dump(const stack_t *stack, const int err_code, const int n_line, cons
 					
 						stack->size, &(stack->size),
 						stack->capacity, &(stack->capacity),
-						
+						stack->elem_size, &(stack->elem_size),
+
 					#if PROTECTION_LVL2
 						stack->hash_value, &(stack->hash_value),
 					#endif
@@ -443,13 +449,15 @@ void stack_dump(const stack_t *stack, const int err_code, const int n_line, cons
 			   		
 			   		stack->data);
 
-	dump_stack_data(stack);
+	//dump_stack_data(stack);
 	MDLOG("}\n"
 		   "________________________________________________\n\n");
 	return;
 }
 //----------------------------------------------------------------------------------------//
 
+// TODO: ???
+/*
 static void dump_stack_data(const stack_t *stack){
 
 	assert(stack != NULL);
@@ -467,3 +475,4 @@ static void dump_stack_data(const stack_t *stack){
 	return;
 }
 //----------------------------------------------------------------------------------------//
+*/

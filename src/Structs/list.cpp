@@ -29,7 +29,7 @@ int 			_extract_free_ind(list* obj, META_PARAMS);
 int 			node_cmp(const void * node1, const void * node2);
 LIST_VERIF_CODE list_verification(const list* obj);
 //void		 	print_list(const list* obj);
-//int 			get_file_size(const char* name);
+//int 			GetFileSize(const char* name);
 
 #if ENABLE_SORT
 void 			list_sort(list* obj);
@@ -1046,7 +1046,7 @@ void print_list(list* obj){
 	Sleep(80);
 	// КОСТЫЛЬ
 
-    int buflen = get_file_size(GVIZ_HTM_NAME);
+    int buflen = GetFileSize(GVIZ_HTM_NAME);
 
 	tmp_file = fopen(GVIZ_HTM_NAME, "r");
  	
@@ -1060,7 +1060,7 @@ void print_list(list* obj){
 	return;
 }
 
-int get_file_size(const char* name){
+int GetFileSize(const char* name){
 	
 	assert(name != NULL);
 

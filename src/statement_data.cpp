@@ -1,3 +1,6 @@
+//! DEPRECATE SAFE
+
+/*
 #include "statement_data.h"
 
 const char* get_statement_name(STATEMENT_ID id){
@@ -35,3 +38,4 @@ void get_type_name(LEXEM_TYPE type, char* str){
     return;
 }
 //----------------------------------------------------------------------------------------//
+*/
