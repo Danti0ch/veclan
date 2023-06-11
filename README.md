@@ -41,7 +41,7 @@ As an example, you can see the file  [input.txt](samples/lexer_generator/input.t
 ### Implementation details
 the resulting lexer is a deterministic finite automaton that, based on an array of characters, issues attributes of the recognized token.
 
-<img src="res/Pasted image 20230611191232.png" width="600">
+<img src="res/Pasted image 20230611191232.png">
 
 To generate a lexer, the program reads all regular expressions, on the basis of which it builds AST using recursive descent. Then the ast is converted to nondeterministic finite automaton. Algorithms for building and optimizing NFA, DFA can be found in "Basics of Compiler Design" by Torben Mogensen. At the next stage, NFA is generated, which is a union of the NFA built at the previous stage. This NFA is converted to DFA , on the basis of which a source code file is generated. 
 
@@ -115,9 +115,9 @@ DumpLexGraph(tree_dfa, "dfa_demo.png");
 
 Based on the regular expression ``[a-c] | (159)a*``, the NFA was built. Note that the initial state is marked in green, the intermediate state is yellow, and the final state is red.
 
-<img src="res/nfa_demo.png" width="600">
+<img src="res/nfa_demo.png" width="300">
 Then DFA was built on the basis of NFA
-<img src="res/dfa_demo.png" width="600">
+<img src="res/dfa_demo.png" width="300">
 
 ### Information resources
 1. "Basics of Compiler Design" by Torben Mogensen, издание 20.08.2010. Разделы 2.6, 2.8
