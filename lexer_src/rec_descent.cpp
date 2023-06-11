@@ -100,7 +100,7 @@ Node* CreateAST(const char* input_file_name){
 }
 //----------------------------------------------------------------------------------------//
 
-Node* CreateAST(char* buffer, size_t size){
+Node*       CreateAST(char* buffer, size_t size){
     
     NASSERT(buffer);
     handler = {NULL, 0, 0, 0, 0};
