@@ -32,7 +32,6 @@ LFLAGS := -export-dynamic -no-pie
 
 main: $(OBJ_FILES) #$(PLUGINS_FILES)
 	$(CXX) -o $(BIN)/$@ $^ $(LFLAGS)
-# $(BIN)/$@  $(BIN)/nigger.vm
 
 ifeq ($(mode), lexer)
 lexer_demo:	$(OBJ_FILES)
