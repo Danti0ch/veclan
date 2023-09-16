@@ -4,7 +4,11 @@ For compiled programming languages, there are several stages of processing the s
 
 Manual writing of a lexical analyzer (lexer) is a rather time-consuming and crutchy task, which is why most developers use programs that allow generating lexical analyzers based on some configuration file. In my work, my own version of the implementation of such a generator is presented.
 
+### Deps
+- graphviz
+
 ### Usage
+``` $ mkdir build bin```<br/>
 ``` $ make mode=lexer```<br/>
 ``` $ ./bin/main CONFIG_NAME DST_DIR_NAME```<br/>
 
