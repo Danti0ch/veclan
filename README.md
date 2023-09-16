@@ -8,6 +8,7 @@ Manual writing of a lexical analyzer (lexer) is a rather time-consuming and crut
 - graphviz
 
 ### Usage
+``` $ mkdir build bin```<br/>
 ``` $ make mode=lexer```<br/>
 ``` $ ./bin/main CONFIG_NAME DST_DIR_NAME # to build lexer```<br/>
 ``` $ ./bin/main --reg_to_fa # to show NFA and DFA of regexp```<br/>
