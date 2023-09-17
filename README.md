@@ -4,9 +4,13 @@ For compiled programming languages, there are several stages of processing the s
 
 Manual writing of a lexical analyzer (lexer) is a rather time-consuming and crutchy task, which is why most developers use programs that allow generating lexical analyzers based on some configuration file. In my work, my own version of the implementation of such a generator is presented.
 
+### Deps
+- graphviz
+
 ### Usage
 ``` $ make mode=lexer```<br/>
-``` $ ./bin/main CONFIG_NAME DST_DIR_NAME```<br/>
+``` $ ./bin/main CONFIG_NAME DST_DIR_NAME # to build lexer```<br/>
+``` $ ./bin/main --reg_to_fa # to show NFA and DFA of regexp```<br/>
 
 ### Structure of generator
 In my implementation, the generated lexer is an object (or text) file that contains a function that parses an array of characters and gives the attributes of the recognized token: the group code of its type and the common number (for example, if the token is the name of a conditional operator, the function will return the keyword group code and the common number corresponding to this conditional operator).
