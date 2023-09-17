@@ -41,9 +41,9 @@ int main(const int argc, const char* argv[]){
     if(!strcmp(argv[1], "--reg_to_fa")) {
         
         char regexp[256] = {};
+        printf("regexp: ");
         fgets(regexp, 256, stdin);
 
-        printf("regexp: %s\n", regexp);
         ShowNFA(regexp);
         ShowDFA(regexp);
 
