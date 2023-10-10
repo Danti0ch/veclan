@@ -33,12 +33,12 @@ struct accept_state_meta{
 
 struct lex_graph{
 
-    vec_set*  alphabet;
-    vector*   states;
-    vec_set*  accept_states;
+    struct vec_set*  alphabet;
+    struct vector*   states;
+    struct vec_set*  accept_states;
 
     // TODO: maybe other way to contain that data? hash_table or smth
-    vector*   accept_states_meta_data;
+    struct vector*   accept_states_meta_data;
     uint      start_state;
 };
 
@@ -63,6 +63,21 @@ lex_graph*  ConvertTreeToNFA(const Node* ast_tree, vector* accept_state_meta_dat
  * @brief генерация DFA графа на основе NFA графа. Алгоритм см в начале файла
  */
 lex_graph*  ConvertNFAtoDFA(const lex_graph* nfa_graph);
+
+/**
+ * @brief генерация NFA графа без эпсилон переходов на основе NFA графа. Алгоритм аналогичен DFA с небольшой поправкой в коде
+ */
+lex_graph*  ConvertNFAtoAdvNFA(const lex_graph* nfa_graph);
+
+/**
+ * @brief добавляет стоковую вершину к графу fa_graph
+ */
+void  ConvertToCompleteFA(const lex_graph* fa_graph);
+
+/**
+ * @brief дополнение от КА
+ */
+lex_graph*  ConvertCDFAToAddition(const lex_graph* dfa_graph);
 
 void       LexGraphRemove(lex_graph* graph);
 

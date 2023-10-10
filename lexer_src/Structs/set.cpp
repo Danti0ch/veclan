@@ -52,7 +52,7 @@ int set_erase(struct set *s, size_t elem){
 }
 //_______________________________________________________________________________________________
 
-int set_find(struct set const *s, size_t elem){
+int set_test(struct set const *s, size_t elem){
 	if(elem >= s->capacity) return 0;
 
 	return *(s->bt_fld + elem) == 1;
@@ -148,7 +148,6 @@ int set_cmp(set* s1, set* s2){
 	//if(s1->capacity != s2->capacity) return 1;
 
 	// TODO: OPTIMIZE
-
 	uint n_elems = s1->capacity;
 
 	for(uint n_elem = 0; n_elem < n_elems; n_elem++){
@@ -158,5 +157,11 @@ int set_cmp(set* s1, set* s2){
 	}
 
 	return 0;
+}
+//----------------------------------------------------------------------------------------//
+
+void set_clear(struct set *s) {
+	
+	memset(s->bt_fld, 0, s->capacity);
 }
 //----------------------------------------------------------------------------------------//

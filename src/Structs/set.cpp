@@ -52,7 +52,7 @@ int set_erase(struct set *s, size_t elem){
 }
 //_______________________________________________________________________________________________
 
-int set_find(struct set const *s, size_t elem){
+int set_test(struct set const *s, size_t elem){
 	if(elem >= s->capacity) return 0;
 
 	return *(s->bt_fld + elem) == 1;

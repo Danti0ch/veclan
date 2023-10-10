@@ -7,9 +7,6 @@
 struct vec_set{
     vector* vt;
     set*    st;
-
-    size_t elem_size;
-    void  (*get_data_to_set_func)();
 };
 
 const uint VECSET_INIT_CAPACITY = 16;
@@ -25,5 +22,6 @@ int       VecsetFind(const vec_set* obj, const uint elem);
 int       VecsetEmpty(const vec_set* obj);
 int       VecsetCmp(const vec_set* obj1, const vec_set* obj2);
 void      VecsetPrint(const vec_set* obj);
+vec_set*  VecsetDuplicate(const vec_set* from);
 
 #endif // VEC_SET_H

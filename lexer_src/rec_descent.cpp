@@ -41,19 +41,6 @@ Node* GetL3();
 /// @brief handles brackets and symbols
 Node* GetL4();
 
-/// @brief handles set of symbols
-Node* GetEnum();
-
-/**
- * @brief replaces cur_root with new_root(new_root_symb) in tree, than make cur_root left child of new_root and makes child in right of new_root with right_node_symb
- * 
- * @param cur_root 
- * @param new_root_symb 
- * @param right_node_symb 
- * @return Node* 
- */
-Node* make_node_level(Node* cur_root, char new_root_symb, char right_node_symb);
-
 
 /**
  * @brief replaces cur_root with new_root(new_root_symb) in tree, than make cur_root left child of new_root and makes child in right of new_root with right_node
@@ -78,28 +65,6 @@ inline int isspace(char symb){
 
 //========================================================================================//
 
-Node* CreateAST(const char* input_file_name){
-    
-    NASSERT(input_file_name);
-    handler = {NULL, 0, 0, 0, 0};
-
-    handler.storage = GetStorage(input_file_name);
-    handler.n_symbs = handler.storage->len_buf;
-
-    assert(0);
-    if(ISNULL(handler.storage)){
-        EDLOG(OPENING_FILE, "unable to open %s", input_file_name);
-    }
-
-    if(isspace(cur_symb())) pass_symb();
-
-    Node* tree = GetL1();
-    
-    TextStorageRemove(handler.storage);
-    return tree;
-}
-//----------------------------------------------------------------------------------------//
-
 Node*       CreateAST(char* buffer, size_t size){
     
     NASSERT(buffer);
@@ -117,71 +82,6 @@ Node*       CreateAST(char* buffer, size_t size){
 }
 //----------------------------------------------------------------------------------------//
 
-void Print_Func(FILE* output_file, uint cur_n_node, const Node* node){
-    //#if DUMP_MODE == DETAILED_DUMP
-
-        char symb = *(char*)node->val;
-
-        if(symb == SPEC_OR_VAL){
-            fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#E6F099\", ", cur_n_node);
-        }
-        else if(symb == SPEC_BOND_VAL){
-            fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#6E90CA\", ", cur_n_node);
-        }
-        else if(symb == SPEC_REP_VAL){
-            fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#CA6EC2\", ", cur_n_node);
-        }
-        else{
-            fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#6ECA7B\", ", cur_n_node);
-        }
-		
-		fprintf(output_file, 	"shape = \"record\", label = \"{"
-								"adress:  %p |"
-								"parent:  %p |"
-								"left:    %p |"
-								"right:   %p |"
-								"place:   %s |",
-								node,
-								node->parent,
-								node->left,
-								node->right,
-								node->place == NODE_PLACE::LEFT ? "left" : "right");
-
-        if(symb == SPEC_OR_VAL){
-            fprintf(output_file, "value:  OR}\"];\n");
-        }
-        else if(symb == SPEC_BOND_VAL){
-            fprintf(output_file, "value:  BOND}\"];\n");
-        }
-        else if(symb == SPEC_REP_VAL){
-            fprintf(output_file, "value:  REP}\"];\n");
-        }
-        else{
-            fprintf(output_file, "value:  %c}\"];\n", symb);
-        }
-    return;
-		/*
-	#else
-		if(IsConstant(node)){
-			fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#E6F099\", shape = \"record\", label = \"%.6lg\"]\n", cur_n_node, node->node->value);
-		}
-
-		else if(IsVariable(node)){
-			fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#6E90CA\", shape = \"record\", label = \"%c\"];\n", cur_n_node, node->value);
-		}
-		else if(IsOperation(node)){
-			fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#CA6EC2\", shape = \"record\", label = \"%c\"];\n", cur_n_node, node->value);			
-		}
-		else if(IsFunction(node)){
-			fprintf(output_file, "%d[style = \"filled\", fillcolor = \"#6ECA7B\", shape = \"record\", label = \"%s\"];\n", cur_n_node, GetFuncName(node->value.func_id));
-		}
-		else{
-			ToLog(LOG_TYPE::ERROR, "try to dump invalid node(Node %p)", node);
-			return;
-		}
-	#endif //DUMP_MODE == DETAILED_DUMP
-    */
-}
 //========================================================================================//
 
 //                          LOCAL_FUNCTIONS_DEFINITION
@@ -305,14 +205,6 @@ Node* GetL4(){
             temp_root = make_node_level(temp_root, SPEC_BOND_VAL, right_ch);
         }*/
     }
-    else if(symb == '['){
-        pass_symb();
-
-        prim_node = GetEnum();
-
-        require(']');
-        pass_symb();
-    }
     else{
 
         prim_node = NodeCtor(&symb, sizeof(char));
@@ -322,78 +214,6 @@ Node* GetL4(){
     return prim_node;
 }
 //----------------------------------------------------------------------------------------//
-
-Node* GetEnum(){
-
-    if(cur_symb() == ']') EDLOG(OWN, "Found empty enumeration on (%u, %u)", handler.ln, handler.col);
-    
-    char l_symb = cur_symb();
-    pass_symb();
-
-    Node* prim_node = NodeCtor(&l_symb, sizeof(char));
-
-    Node* temp_root = prim_node;
-    
-/*
-    Node* root = NodeCtor(&SPEC_OR_VAL, sizeof(char));
-
-    NodeCtor(root, &l_symb, sizeof(char), NODE_PLACE::LEFT);
-
-    char r_symb = cur_symb();
-    pass_symb();
-
-    Node* temp_root = NULL;
-    if(r_symb == '-'){
-        pass_symb();
-
-        r_symb = cur_symb();
-
-        if(r_symb == '-' || r_symb < symb){
-            EDLOG(OWN, "Error while parsing enumeration on (%u, %u)", handler.ln, handler.col);
-        }
-
-        while(l_symb != r_symb){
-            temp_root = make_node_level()
-        }
-    }
-    else{
-        temp_root = NodeCtor(root, &r_symb, sizeof(char), NODE_PLACE::RIGHT);
-    }
-*/
-
-    while(cur_symb() != ']'){
-        
-        if(cur_symb() == '-'){
-            pass_symb();
-
-            char r_symb = cur_symb();
-            pass_symb();
-            if(r_symb == '-' || l_symb >= r_symb){
-                EDLOG(OWN, "Error while parsing enumeration on (%u, %u)", handler.ln, handler.col);
-            }
-
-            for(char cur_symb = l_symb + 1; cur_symb <= r_symb; cur_symb++){
-                temp_root = make_node_level(temp_root, SPEC_OR_VAL, cur_symb);
-                temp_root = temp_root->right;
-            }
-            l_symb = r_symb;
-        }
-        else{
-
-            l_symb = cur_symb();
-            pass_symb();
-
-            temp_root = make_node_level(temp_root, SPEC_OR_VAL, l_symb);
-            temp_root = temp_root->right;
-        }
-    }
-
-    if(IsValid(prim_node->parent)){
-        return prim_node->parent;
-    }
-
-    return prim_node;
-}
 
 void pass_symb(){
     
@@ -416,25 +236,6 @@ void require(char symb){
     if(cur_symb() != symb){
         EDLOG(OWN, "On (%u, %u) expected %c, found %c", handler.ln, handler.col, symb, cur_symb());
     }
-}
-//----------------------------------------------------------------------------------------//
-
-Node* make_node_level(Node* cur_root, char new_root_symb, char right_node_symb){
-
-    NASSERT(cur_root);
-
-    Node* new_root = NodeCtor(&new_root_symb, sizeof(char));
-
-    if(IsValid(cur_root->parent)){
-        Node* cur_parent = cur_root->parent;
-        BreakConnWithParent(cur_root);
-        MakeConnection(cur_parent, new_root, NODE_PLACE::RIGHT);
-    }
-    
-    NodeCtor(new_root, &right_node_symb, sizeof(char), NODE_PLACE::RIGHT);
-    MakeConnection(new_root, cur_root, NODE_PLACE::LEFT);
-
-    return new_root;
 }
 //----------------------------------------------------------------------------------------//
 

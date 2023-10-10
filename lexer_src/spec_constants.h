@@ -14,10 +14,10 @@ enum class SPEC_SYMBOL{
     EPS
 };
 
-const char SPEC_OR_VAL      = (char)SPEC_SYMBOL::OR;
-const char SPEC_REP_VAL     = (char)SPEC_SYMBOL::REP;
-const char SPEC_BOND_VAL    = (char)SPEC_SYMBOL::BOND;
-const char SPEC_EPS_VAL     = (char)SPEC_SYMBOL::EPS;
+const char SPEC_OR_VAL      = 0;
+const char SPEC_REP_VAL     = 1;
+const char SPEC_BOND_VAL    = 2;
+const char SPEC_EPS_VAL     = 3;
 
 const char SPEC_OR_SYMB    = '|';
 const char SPEC_REP_SYMB   = '*';

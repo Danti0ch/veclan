@@ -1,6 +1,8 @@
 #include "vec_set.h"
 #include "logger.h"
 #include "stdio.h"
+#include "vector.h"
+#include <string.h>
 
 vec_set* VecsetCtor(const size_t init_capacity){
 
@@ -43,7 +45,7 @@ void VecsetDtor(vec_set* obj){
 void VecsetPush(vec_set* obj, const uint elem){
 
     NASSERT(obj);
-    if(!set_find(obj->st, elem)){
+    if(!set_test(obj->st, elem)){
         VectorPush(obj->vt, &elem);
         set_insert(obj->st, elem);
     }
@@ -65,7 +67,7 @@ int VecsetFind(const vec_set* obj, const uint elem){
 
     NASSERT(obj);
 
-    return set_find(obj->st, elem);
+    return set_test(obj->st, elem);
 }
 //----------------------------------------------------------------------------------------//
 
@@ -129,5 +131,21 @@ void VecsetPrint(const vec_set* obj){
 
     printf("\n");
     return;
+}
+//----------------------------------------------------------------------------------------//
+
+vec_set* VecsetDuplicate(const vec_set* from){
+    
+    NASSERT(from);
+
+    vec_set* new_obj = (vec_set*)calloc(1, sizeof(vec_set));
+
+    new_obj->vt = VectorGenerateDuplicate(from->vt);
+    new_obj->st = set_new(from->st->capacity);
+    
+    memcpy(from->st->bt_fld, new_obj->st->bt_fld, from->st->capacity);
+    new_obj->st->size = from->st->size;
+
+    return new_obj;
 }
 //----------------------------------------------------------------------------------------//

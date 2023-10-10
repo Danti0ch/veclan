@@ -21,10 +21,13 @@ int set_insert(struct set *s, size_t elem);
 int set_erase(struct set *s, size_t elem);
 
 //Вернуть 1, если элемент присутствует в множестве и 0 в противном случае.
-int set_find(struct set const *s, size_t elem);
+int set_test(struct set const *s, size_t elem);
 
 //Удалить объект множество и вернуть NULL
 struct set *set_delete(struct set *s);
+
+//очистить множество
+void set_clear(struct set *s);
 
 //Предикат: вернуть единицу, если в множестве есть хотя бы один элемент и ноль в противном случае.
 int set_empty(struct set const *s);

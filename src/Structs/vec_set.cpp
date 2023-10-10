@@ -43,7 +43,7 @@ void VecsetDtor(vec_set* obj){
 void VecsetPush(vec_set* obj, const uint elem){
 
     NASSERT(obj);
-    if(!set_find(obj->st, elem)){
+    if(!set_test(obj->st, elem)){
         VectorPush(obj->vt, &elem);
         set_insert(obj->st, elem);
     }
@@ -65,7 +65,7 @@ int VecsetFind(const vec_set* obj, const uint elem){
 
     NASSERT(obj);
 
-    return set_find(obj->st, elem);
+    return set_test(obj->st, elem);
 }
 //----------------------------------------------------------------------------------------//
 

@@ -16,10 +16,7 @@ struct input_handler{
     uint    n_symbs;
 };
 
-Node* CreateAST(const char* input_file_name);
 //! buffer will be cleaned
 Node* CreateAST(char* buffer, size_t size);
-
-void Print_Func(FILE* output_file, uint cur_n_node, const Node* val);
 
 #endif // LEX_NODE_H
